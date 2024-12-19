@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>IP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+
+		<script src="{{ url_for('static',filename='assets/js/jquery.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='assets/js/jquery.scrolly.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='assets/js/jquery.scrollex.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='assets/js/skel.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='assets/js/util.js') }}"></script>
+		<script src="{{ url_for('static',filename='assets/js/main.js') }}"></script>
+		
+		<script src="{{ url_for('static',filename='assets/js/bootstrap.bundle.min.js') }}"></script>
+		<link href="{{ url_for('static',filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+		
+		
+		{% block head %}{% endblock head %}
+	</head>
+	<body>
+		<header id="header" class="alt">
+			{%- set display_title = {
+					"/api/search" : "api home",
+					"/" : "Home",
+				}
+			-%}
+			<div class="logo">
+				<a href="/">Infra <span> IP Management | {{ display_title[request.url_rule.endpoint] | default("Home") }} {{ "| " + current_user.id if current_user.id else "" }} | Role: {{current_user.role | default("Guest") }}
+				</span></a>
+			</div>
+			<a href="#menu">Menu</a>
+		</header>
+		<nav id="menu">
+			{% if current_user.role == "Admin" %}
+				<ul class="links">
+					<li><a href="/">首頁</a></li>
+					<li><a href="/register">新增使用者</a></li>
+					<li><a href="/logout">登出</a></li>
+				</ul>
+			{% elif current_user.is_authenticated %}
+			<ul class="links">
+				<li><a href="/">首頁</a></li>
+				<li><a href="/logout">登出</a></li>
+			</ul>
+			{% else %}
+				<ul class="links">
+					<li><a href="/">首頁</a></li>
+					<li><a href="/login">登入</a></li>
+				</ul>
+			{% endif %}
+		</nav>
+
+		<!-- Banner Section with conditional styling -->
+		<section id="banner" style="background-image:url({{ url_for('static', filename='images/banner.jpg') }}); {% if self.main() | trim  %}height: 3vh !important; min-height: 3vh !important; padding: 1em 0 5em 0 !important;{% endif %}">
+			<div class="inner">
+				{% block title %}{% endblock title %}
+			</div>
+		</section>
+
+		{% block main %}{% endblock main %}
+
+		<footer id="footer">
+			<div class="copyright">
+				<p>&copy; IP Management</p>
+			</div>
+		</footer>
+
+		
+	</body>
+</html>

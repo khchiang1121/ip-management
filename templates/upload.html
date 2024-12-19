@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+{% endblock head %}
+
+{% block title %}
+<header>
+	<h1>Inventory Uploader</h1>
+	<p>新增</p>
+</header>
+
+<form action="/upload" enctype="multipart/form-data" method="post">
+
+	<div class="col-xs-2 mb-3">
+		<label for="formFile" class="form-label">上傳檔案</label>
+		<input class="form-control" type="file" name="file">
+	</div>
+
+	<!-- <div>
+		<ul class="pagination">
+			<li><a href="/download_example?selected=test">下載範例檔</a></li>
+		</ul>
+	</div> -->
+
+	<div class="mb-3">
+		<button type="submit" name="your_name" value="Upload" class="btn-link">送出</button>
+	</div>
+</form>
+{% if (if_success is none) %}
+{% elif (if_success is true) %}
+	<p> 新增成功 <br /></p>
+	{% if display_result is defined %}
+		<div class="mb-3">
+			<label for="exampleFormControlTextarea1" class="form-label">新增成功</label>
+			<textarea class="form-control" id="exampleFormControlTextarea1" rows="5" readonly>{{ display_result }}</textarea>
+		</div>
+	{% endif %}
+{% elif (if_success is false) %}
+	<p>操作失敗，請重新整理並再試一次 <br /></p>
+	{% if display_result is defined %}
+	<div class="mb-3">
+		<!-- <label for="exampleFormControlTextarea1" class="form-label">發生異常，請重新檢查資料</label> -->
+		<textarea class="form-control" id="exampleFormControlTextarea1" rows="5" readonly>{{ display_result }}</textarea>
+	</div>
+	{% endif %}
+{% endif %}
+
+{% endblock title %}
+
+{% block main %}
+{% endblock main %}

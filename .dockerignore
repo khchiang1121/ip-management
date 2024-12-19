@@ -1,0 +1,9 @@
+mongodb_data
+flask_session
+.env
+.env.local
+member.json
+test_cluster_data/
+test_server_data/
+test_cluster_response_data/
+test_server_response_data/

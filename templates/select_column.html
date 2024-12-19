@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block head %}
+   <!-- Material Design Components (MDC) -->
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-components-web@14.0.0/dist/material-components-web.min.css">
+   <script src="https://cdn.jsdelivr.net/npm/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
+   <!-- DataTables for enhanced table functionality -->
+   <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css"> -->
+   <link rel="stylesheet" href="{{ url_for('static',filename='assets/css/datatables.min.css') }}">
+   <!-- <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script> -->
+    <script src="{{ url_for('static',filename='assets/js/datatables.min.js') }}"></script>
+
+   <title>Map Columns to Network Keys</title>
+    <!-- Custom Styles -->
+    <style>
+        .draggable {
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #6200ea;
+            color: white;
+            border-radius: 4px;
+            margin: 5px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .droppable.active {
+            border-color: #6200ea;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .mdc-button {
+            margin-left: 1rem;
+        }
+
+        .popup {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .table-container {
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .table-container-top {
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 10px;
+        }
+
+        #network-keys {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+        }
+
+        .delete-column {
+            cursor: pointer;
+            color: red;
+            margin-left: 5px;
+        }
+    </style>
+{% endblock head %}
+
+{% block title %}
+{% endblock title %}
+
+{% block main %}
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <div class="container-fluid py-5">
+        <h1>Map Columns to Network Keys</h1>
+        <p>Uploaded data is displayed below. Drag and drop the network keys onto the appropriate table columns.</p>
+
+        <form id="mapping-form" action="{{ url_for('upload.process_mapping') }}" method="post">
+
+            <!-- Draggable Network Keys -->
+            <div id="network-keys">
+                {%- set map_key_to_text = {
+                    "server_id": "Server ID",
+                    "hostname": "Hostname",
+                    "serial_number": "SN",
+                    "location": "Location",
+                    "datacenter": "Datacenter",
+                    "room": "Room",
+                    "rack": "Rack",
+                    "unit": "Unit",
+                    "os": "OS",
+                    "owner": "Owner",
+                    "cluster_id": "Cluster ID",
+                    "env_config": "ENV Config",
+                    "data_ip": "Data IP",
+                    "data_subnet_mask": "Data Mask",
+                    "data_mac": "Data MAC",
+                    "maas_ip": "Maas IP",
+                    "maas_subnet_mask": "Maas Mask",
+                    "maas_mac": "Maas MAC",
+                    "admin_ip": "Admin IP",
+                    "admin_subnet_mask": "Admin Mask",
+                    "admin_mac": "Admin MAC",
+                } -%}
+                {% for key, value in map_key_to_text.items() %}
+                    <div class="draggable" draggable="true" data-key="{{ key }}">{{ value }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-container">
+                <button type="button" class="mdc-button mdc-button--outlined" id="cancel-btn">Cancel</button>
+                <button type="submit" class="mdc-button mdc-button--raised" id="submit-btn">Submit</button>
+            </div>
+
+            <div class="table-container">
+                <h2 class="mt-5">Uploaded Data</h2>
+                <h2 class="mt-5"></h2>
+                <h2 class="mt-5"></h2>
+
+                <table id="uploaded-table" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            {% for column in columns %}
+                                <th class="droppable text-nowrap" data-column="{{ column }}">
+                                    {{ column }}
+                                    <span class="delete-column" title="Delete Column">&times;</span>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                            <tr>
+                                {% for value in row.values() %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Hidden input to store mappings -->
+            <input type="hidden" name="column_mappings" id="column-mappings">
+        </form>
+
+    </div>
+
+    <!-- Initialize Components -->
+    <script>
+        // Drag and drop functionality
+        const draggables = document.querySelectorAll('.draggable');
+        const droppables = document.querySelectorAll('.droppable');
+        const popup = document.createElement('div');
+        popup.classList.add('popup');
+        document.body.appendChild(popup);
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', () => {
+                draggable.classList.add('dragging');
+            });
+
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+        });
+
+        droppables.forEach(droppable => {
+            droppable.addEventListener('dragover', e => {
+                e.preventDefault();
+                droppable.classList.add('active');
+            });
+
+            droppable.addEventListener('dragleave', () => {
+                droppable.classList.remove('active');
+            });
+
+          
+
+            droppable.addEventListener('drop', e => {
+                e.preventDefault();
+                const draggable = document.querySelector('.dragging');
+                if (draggable) {
+                    //popup.textContent = draggable.textContent;
+                    //const rect = droppable.getBoundingClientRect();
+                    //popup.style.top = `${rect.top - popup.offsetHeight}px`;
+                    //popup.style.left = `${rect.left}px`;
+                    //popup.style.display = 'block';
+
+                    const existingMapping = draggable.querySelector('.mapped-key');
+                    if (!existingMapping) {
+                        console.log("")
+                    }
+                    const mappedKey = document.createElement('div');
+                    mappedKey.classList.add('mapped-key');
+                    mappedKey.textContent = draggable.textContent;
+        
+                    // Attach the div on top of the column header cell
+                    mappedKey.style.position = 'absolute';
+                    mappedKey.style.top = '0';
+                    mappedKey.style.width = '100%';
+                    droppable.style.position = 'relative';
+                    droppable.prepend(mappedKey);
+            
+                    draggable.dataset.mappedKey = droppable.dataset.column;
+                    droppable.classList.remove('active');
+                    draggable.style.display = 'none';
+                }
+            });  
+        });
+
+        // Delete column feature
+        document.querySelectorAll('.delete-column').forEach(button => {
+            button.addEventListener('click', e => {
+                const column = e.target.closest('th');
+                const index = [...column.parentElement.children].indexOf(column);
+
+                // Remove column header and corresponding cells
+                column.remove();
+                document.querySelectorAll('#uploaded-table tbody tr').forEach(row => {
+                    row.children[index].remove();
+                });
+            });
+        });
+
+        // Submit button functionality
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const mappings = {};
+            draggables.forEach(draggable => {
+                const key = draggable.dataset.key;
+                const column = draggable.dataset.mappedKey;
+                if (key && column) {
+                    mappings[key] = column;
+                }
+            });
+
+            // Set the mappings as a JSON string in the hidden input field
+            document.getElementById('column-mappings').value = JSON.stringify(mappings);
+
+            // Submit the form
+            document.getElementById('mapping-form').submit();
+        });
+
+    </script>
+
+    <!-- jQuery for DataTables -->
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+
+{% endblock main %}
