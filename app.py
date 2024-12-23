@@ -5,6 +5,8 @@ import os
 import json
 import jinja2
 import os
+from services.cluster import ClusterService
+from services.server import ServerService
 from utils.notify import *
 from flask_session import Session
 from utils.config import flask_port, flask_admin_user, flask_admin_password
@@ -41,17 +43,27 @@ app.register_blueprint(upload_bp, url_prefix="/upload")
 # Server API
 from view.server_api import(server_api)
 app.register_blueprint(server_api, url_prefix="/api/servers")
+from view.server import(server_bp)
+app.register_blueprint(server_bp, url_prefix="/servers")
 
 # Cluster API
 from view.cluster_api import(cluster_api)
 app.register_blueprint(cluster_api, url_prefix="/api/clusters")
-
+from view.cluster import(cluster_bp)
+app.register_blueprint(cluster_bp, url_prefix="/clusters")
 # =============================================================================
 # Flask route
 # =============================================================================
 @app.route("/", methods = ['GET'])
 def index():
-    return redirect(url_for('upload.upload'))
+    # return redirect(url_for('upload.upload'))
+    cluster_service = ClusterService()
+    server_service = ServerService()
+    cluster_count = cluster_service.count()
+    server_count = server_service.count()
+    server_inconsistencies_count = len(server_service.find_network_inconsistencies_all())
+    cluster_inconsistencies_count = len(cluster_service.find_network_inconsistencies_all())
+    return render_template('index.html', server_count=server_count, cluster_count = cluster_count, server_inconsistencies_count = server_inconsistencies_count, cluster_inconsistencies_count = cluster_inconsistencies_count),200
 
 # =============================================================================
 # Flask handler
@@ -86,7 +98,6 @@ def unauthorized(error):
         return jsonify(response), 401
     return render_template('401.html'),401, {"Refresh": "1; url=/"}
 
-@app.before_first_request
 def initialize_app():
     # Custom initialization logic
     print("Custom initialization before first request")
@@ -114,5 +125,8 @@ def before_request():
         return
     return None
 
+with app.app_context():
+    initialize_app()
+
 if __name__ == "__main__":
-    app.run(port = flask_port, host = "0.0.0.0", debug = False)
+    app.run(port = flask_port, host = "0.0.0.0", debug = True)

@@ -118,7 +118,7 @@ def delete_server(server_id):
 @server_api.route("/network-inconsistencies", methods = ['GET'])
 def get_ip_inconsistencies():
     server_service = ServerService()
-    inconsistencies =  server_service.find_ip_inconsistencies_all()
+    inconsistencies =  server_service.find_network_inconsistencies_all()
     
     if inconsistencies is None:
         return jsonify([]), 200
@@ -133,7 +133,7 @@ def get_ip_inconsistencies():
 @server_api.route("<string:server_id>/network-inconsistencies", methods = ['GET'])
 def get_server_ip_inconsistencies(server_id):
     server_service = ServerService()
-    inconsistency =  server_service.find_ip_inconsistencies(server_id)
+    inconsistency =  server_service.find_network_inconsistencies(server_id)
     
     if inconsistency is None:
         return jsonify({}), 200

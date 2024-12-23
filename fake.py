@@ -371,6 +371,7 @@ def generate_fake_cluster_data():
     # Base structure
     data = {
         "cluster_id": cluster_id,
+        "cluster_name": cluster_id,
         "env_config": cluster_id,
         "owners": owner_list,
         "cilium_cluster_id": cilium_cluster_id,

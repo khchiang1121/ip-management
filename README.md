@@ -47,3 +47,6 @@ python ./export_excel.py
 ```
 python get_response.py
 ```
+
+flask --debug run --host=0.0.0.0 --port=8100
+flask --debug run --host=0.0.0.0 --port=8100

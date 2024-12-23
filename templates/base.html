@@ -1,3 +1,9 @@
+{%- set display_title = {
+	"/api/search" : "api home",
+	"/" : "Home",
+}
+-%}
+
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -16,49 +22,118 @@
 		
 		<script src="{{ url_for('static',filename='assets/js/bootstrap.bundle.min.js') }}"></script>
 		<link href="{{ url_for('static',filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static',filename='assets/css/datatables.min.css') }}">
+		<script src="{{ url_for('static',filename='assets/js/datatables.min.js') }}"></script>
 		
-		
+		<style >
+			#a_menu:before {
+				content: "";
+				-moz-osx-font-smoothing: grayscale;
+				-webkit-font-smoothing: antialiased;
+				font-family: FontAwesome;
+				font-style: normal;
+				font-weight: normal;
+				text-transform: none !important;
+				margin: 0 0.5em 0 0;
+			}
+		</style>
 		{% block head %}{% endblock head %}
 	</head>
 	<body>
-		<header id="header" class="alt">
-			{%- set display_title = {
-					"/api/search" : "api home",
-					"/" : "Home",
-				}
-			-%}
-			<div class="logo">
-				<a href="/">Infra <span> IP Management | {{ display_title[request.url_rule.endpoint] | default("Home") }} {{ "| " + current_user.id if current_user.id else "" }} | Role: {{current_user.role | default("Guest") }}
-				</span></a>
-			</div>
-			<a href="#menu">Menu</a>
-		</header>
-		<nav id="menu">
-			{% if current_user.role == "Admin" %}
+
+		{% if not self.main() | trim  %}
+			<header id="header" class="alt" >
+				<div class="logo">
+					<a href="/">Infra <span> IP Management | {{ display_title[request.url_rule.endpoint] | default("Home") }} {{ "| " + current_user.id if current_user.id else "" }} | Role: {{current_user.role | default("Guest") }}				
+					</span></a>
+				</div>
+				<a href="#menu">Menu</a>
+			</header>
+			<nav id="menu">
+				{% if current_user.role == "Admin" %}
+					<ul class="links">
+						<li><a href="/">首頁</a></li>
+						<li><a href="/register">新增使用者</a></li>
+						<li><a href="/logout">登出</a></li>
+					</ul>
+				{% elif current_user.is_authenticated %}
 				<ul class="links">
 					<li><a href="/">首頁</a></li>
-					<li><a href="/register">新增使用者</a></li>
 					<li><a href="/logout">登出</a></li>
 				</ul>
-			{% elif current_user.is_authenticated %}
-			<ul class="links">
-				<li><a href="/">首頁</a></li>
-				<li><a href="/logout">登出</a></li>
-			</ul>
-			{% else %}
+				{% else %}
+					<ul class="links">
+						<li><a href="/">首頁</a></li>
+						<li><a href="/login">登入</a></li>
+					</ul>
+				{% endif %}
+			</nav>
+
+			<!-- Banner Section with conditional styling -->
+			<section id="banner" style="background-image:url({{ url_for('static', filename='images/banner.jpg') }}); {% if self.main() | trim  %}height: 2vh !important; min-height: 2vh !important; padding: 2em 0 5em 0 !important;{% endif %}">
+				<div class="inner">
+					{% block title %}{% endblock title %}
+				</div>
+			</section>
+
+		{% else %}
+
+
+
+
+			<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-transparent mt-1 " style="position: absolute; z-index: 1000; width: 100%;">
+				<div class="container-fluid">
+					<!-- <div id="header" style="width: 40%;">
+						<div class="logo" style="width: 400px;">
+							<a href="/">Infra <span> IP Management | {{ display_title[request.url_rule.endpoint] | default("Home") }} {{ "| " + current_user.id if current_user.id else "" }} | Role: {{current_user.role | default("Guest") }}
+							</span></a>
+						</div>
+					</div> -->
+
+					<a class="navbar-brand" href="#">Infra <span> IP Management | {{ display_title[request.url_rule.endpoint] | default("Home") }} {{ "| " + current_user.id if current_user.id else "" }} | Role: {{current_user.role | default("Guest") }}</span></a>
+
+
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+							<li class="nav-item"><a class="nav-link" href="/upload">Upload Inventory</a></li>
+							<li class="nav-item"><a class="nav-link" href="/servers">View All Servers</a></li>
+							<li class="nav-item"><a class="nav-link" href="/clusters">View All Clusters</a></li>
+							<!-- <li class="nav-item"><a class="nav-link" href="#">Search for Server</a></li> -->
+							<!-- <li class="nav-item"><a class="nav-link" href="#">Search for Cluster</a></li> -->
+							<li class="nav-item"><a class="nav-link" href="#menu" id="a_menu">Menu</a></li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+			<nav id="menu">
+				{% if current_user.role == "Admin" %}
+					<ul class="links">
+						<li><a href="/">首頁</a></li>
+						<li><a href="/register">新增使用者</a></li>
+						<li><a href="/logout">登出</a></li>
+					</ul>
+				{% elif current_user.is_authenticated %}
 				<ul class="links">
 					<li><a href="/">首頁</a></li>
-					<li><a href="/login">登入</a></li>
+					<li><a href="/logout">登出</a></li>
 				</ul>
-			{% endif %}
-		</nav>
+				{% else %}
+					<ul class="links">
+						<li><a href="/">首頁</a></li>
+						<li><a href="/login">登入</a></li>
+					</ul>
+				{% endif %}
+			</nav>
+			<section id="banner" style="background-image:url({{ url_for('static', filename='images/banner.jpg') }}); {% if self.main() | trim  %}height: 1vh !important; min-height: 1vh !important; padding: 2em 0 2em 0 !important;{% endif %}">
+			</section>
+		{% endif %}
 
-		<!-- Banner Section with conditional styling -->
-		<section id="banner" style="background-image:url({{ url_for('static', filename='images/banner.jpg') }}); {% if self.main() | trim  %}height: 3vh !important; min-height: 3vh !important; padding: 1em 0 5em 0 !important;{% endif %}">
-			<div class="inner">
-				{% block title %}{% endblock title %}
-			</div>
-		</section>
+
+
 
 		{% block main %}{% endblock main %}
 

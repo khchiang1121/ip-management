@@ -1,0 +1,73 @@
+{% for inconsistency in inconsistencies %}
+<fieldset class="border rounded p-3 mb-4">
+    <div class="row mb-3">
+        <label class="col-sm-2 col-form-label"><strong>Name</strong></label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" value="{{ inconsistency.name }}" readonly>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label class="col-sm-2 col-form-label"><strong>Type</strong></label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" value="{{ inconsistency.type }}" readonly>
+        </div>
+    </div>
+
+    <hr class="mt-2 mb-3"/>
+
+    {% for detail in inconsistency.details %}
+        <div class="row mb-3">
+            <label class="col-sm-2 col-form-label"><strong>Field</strong></label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{ detail.field }}" readonly>
+            </div>
+            <label class="col-sm-2 col-form-label"><strong>Type</strong></label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" value="{{ detail.type }}" readonly>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-2 col-form-label"><strong>Message</strong></label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" value="{{ detail.message }}" readonly>
+            </div>
+        </div>
+
+        {% if detail.type == 'mismatch' %}
+            {% for val in detail['values'] %}
+                <div class="row mb-3">
+                    <!-- if loop.index is not 1, add a blank blick -->
+                    {% if loop.index == 1 %}
+                        <label class="col-sm-2 col-form-label"><strong>Mismatch</strong></label>
+                    {% else %}
+                        <label class="col-sm-2 col-form-label"><strong></strong></label>
+                    {% endif %}
+                    <label class="col-sm-1 col-form-label"><strong>Sources</strong></label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" value="{{ val.sources | join(', ') }}" readonly>
+                    </div>
+                    <label class="col-sm-1 col-form-label"><strong>Values</strong></label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" value="{{ val.value }}" readonly>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if detail.type == 'missing' %}
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label"><strong>missingSources</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" value="{{ detail.missingSources | join(', ') }}" readonly>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if not loop.last %}
+            <hr class="mt-2 mb-3"/>
+       
+        {% endif %}
+
+    {% endfor %}
+</fieldset>
+{% endfor %}

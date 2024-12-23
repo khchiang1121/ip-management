@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    /* Modern color scheme */
+    body {
+        background-color: #f9f9f9;
+        color: #333;
+    }
+    .navbar {
+        background-color: #4a90e2;
+    }
+    .navbar-brand {
+        font-weight: bold;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    .card-header {
+        background-color: #ffffff;
+        color: #4a90e2;
+        font-weight: bold;
+        border-bottom: none;
+        text-align: center;
+    }
+    .bg-light-blue {
+        background-color: #4a90e2;
+        color: white;
+    }
+    .bg-light-green {
+        background-color: #7ed321;
+        color: white;
+    }
+    .bg-light-orange {
+        background-color: #f5a623;
+        color: white;
+    }
+    .bg-light-red {
+        background-color: #d0021b;
+        color: white;
+    }
+    footer {
+        background-color: #333;
+        color: white;
+    }
+    .footer-text {
+        font-size: 0.9rem;
+    }
+    a.nav-link, a.nav-link:active, a.nav-link:hover {
+        color: #f9f9f9;
+    }
+    a.btn {
+        font-weight: bold;
+    }
+</style>
+{% endblock head %}
+
+{% block title %}
+{% endblock title %}
+{% block main %}
+<!-- <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">IP Management System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Upload Inventory</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">View All Servers</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">View All Clusters</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Search for Server</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Search for Cluster</a></li>
+            </ul>
+        </div>
+    </div>
+</nav> -->
+
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h1 class="display-4 text-primary">Welcome to the Infra Management System</h1>
+            <p class="lead text-secondary">Manage your servers and clusters efficiently.</p>
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-light-blue">
+                <div class="card-header">Server Count</div>
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ server_count | default("-")}}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-light-green">
+                <div class="card-header">Cluster Count</div>
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ cluster_count | default("-")}}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-light-orange">
+                <div class="card-header">Server Inconsistencies</div>
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ server_inconsistencies_count | default("-")}}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-light-red">
+                <div class="card-header">Cluster Inconsistencies</div>
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ cluster_inconsistencies_count | default("-")}}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Links -->
+    <div class="row">
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">View All Servers</h5>
+                    <p class="card-text">Check the list of all servers in the system.</p>
+                    <a href="servers" class="btn btn-info">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">View All Clusters</h5>
+                    <p class="card-text">Explore the clusters in your system.</p>
+                    <a href="clusters" class="btn btn-success">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">View Server Inconsistencies</h5>
+                    <p class="card-text">Check the list of all servers with inconsistencies.</p>
+                    <a href="/servers/network-inconsistencies" class="btn btn-warning">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">View Clusters Inconsistencies</h5>
+                    <p class="card-text">Check the list of all clusters with inconsistencies.</p>
+                    <a href="/clusters/network-inconsistencies" class="btn btn-warning">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Upload Inventory</h5>
+                    <p class="card-text">Update your server and cluster data.</p>
+                    <a href="/upload" class="btn btn-primary">Go</a>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Search for Server</h5>
+                    <p class="card-text">Find specific servers using advanced search.</p>
+                    <a href="#" class="btn btn-warning">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Search for Cluster</h5>
+                    <p class="card-text">Find specific clusters using advanced search.</p>
+                    <a href="#" class="btn btn-danger">Go</a>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>
+
+<!-- <footer class="text-center py-3">
+    <p class="footer-text">Logged in as: <strong>John Doe</strong></p>
+    <p class="footer-text">&copy; 2024 IP Management System</p>
+</footer> -->
+
+
+{% endblock main %}
+
+
+
+  

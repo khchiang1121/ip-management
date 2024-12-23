@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <title>Cluster Data</title>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+        }
+        #cluster-table_filter input {
+            margin-left: 0.5rem;
+        }
+    </style>
+    {% endblock head %}
+
+    {% block title %}
+    {% endblock title %}
+    
+    {% block main %}
+    <div class="container-fluid py-5">
+        <h1 class="mb-4">Cluster Data</h1>
+
+        <!-- Search Input -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="search-input" class="form-control" placeholder="Search...">
+            </div>
+            <div class="col-md-4">
+                <select id="filter-column" class="form-select">
+                    <option value="">Filter by Column</option>
+                    <option value="0">Cluster ID</option>
+                    <option value="1">Cluster Name</option>
+                    <option value="2">Env Config</option>
+                    <option value="3">Key</option>
+                    <option value="4">Field</option>
+                    <option value="5">Message</option>
+                    <option value="6">Details</option>
+                    <option value="7">View</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="filter-value" class="form-control" placeholder="Filter value...">
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="cluster-table" class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Cluster ID</th>
+                        <th>Cluster Name</th>
+                        <th>Env Config</th>
+                        <th>Key</th>
+                        <th>Field</th>
+                        <th>Message</th>
+                        <th>Details</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cluster in clusters %}
+                        {% for i in range(cluster.inconsistencies|length) %}
+                            {% for j in range(cluster.inconsistencies[i].details|length) %}
+                                
+                                    <tr>
+                                        <td>{{ cluster.cluster_id |safe }}</td>
+                                        <td>{{ cluster.cluster_name }}</td>
+                                        <td>{{ cluster.env_config }}</td>
+                                        <td>{{ cluster.inconsistencies[i].key }}</td>
+                                        
+                                        
+                                        <td>{{ cluster.inconsistencies[i].details[j].field }}</td>
+                                        <td>{{ cluster.inconsistencies[i].details[j].message }}</td>
+                        
+                                        {% if cluster.inconsistencies[i].details[j].type == "mismatch" %}
+                                            <td>
+                                                {% for val in cluster.inconsistencies[i].details[j]['values'] %}
+                                                    <div>{{ val.value }} (from {{ val.sources | join(', ') }})</div>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif cluster.inconsistencies[i].details[j].type == "missing" %}
+                                            <td>
+                                                {{ cluster.inconsistencies[i].details[j].missingSources | join(', ') }}
+                                            </td>
+                                        {% else %}
+                                            <td></td>
+                                        {% endif %}
+                                            
+
+                                        <td><a href="{{ url_for('cluster_bp.cluster_details', cluster_id=cluster.cluster_id) }}">View Details</a></td>
+                                    </tr>
+                            {% endfor %}            
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            const table = $('#cluster-table').DataTable({
+                paging: true,
+                info: true,
+                order: [],
+                columnDefs: [
+                    { targets: [7], orderable: false } // Disable sorting on Networks and Sources columns
+                ]
+            });
+
+            // Search functionality
+            $('#search-input').on('input', function() {
+                table.search(this.value).draw();
+            });
+
+            // Column filtering functionality
+            $('#filter-column').on('change', function() {
+                const columnIndex = $(this).val();
+                const filterValue = $('#filter-value').val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+
+            $('#filter-value').on('input', function() {
+                const columnIndex = $('#filter-column').val();
+                const filterValue = $(this).val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+        });
+    </script>
+    {% endblock main %}

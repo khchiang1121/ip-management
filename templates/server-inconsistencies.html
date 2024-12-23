@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <title>Server Data</title>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+        }
+        #server-table_filter input {
+            margin-left: 0.5rem;
+        }
+    </style>
+    {% endblock head %}
+
+    {% block title %}
+    {% endblock title %}
+    
+    {% block main %}
+    <div class="container-fluid py-5">
+        <h1 class="mb-4">Server Data</h1>
+
+        <!-- Search Input -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="search-input" class="form-control" placeholder="Search...">
+            </div>
+            <div class="col-md-4">
+                <select id="filter-column" class="form-select">
+                    <option value="">Filter by Column</option>
+                    <option value="0">Server ID</option>
+                    <option value="1">Hostname</option>
+                    <option value="2">Location</option>
+                    <option value="3">Key</option>
+                    <option value="4">Field</option>
+                    <option value="5">Message</option>
+                    <option value="6">Details</option>
+                    <option value="7">View</option>
+
+
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="filter-value" class="form-control" placeholder="Filter value...">
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="server-table" class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Server ID</th>
+                        <th>Hostname</th>
+                        <th>Location</th>
+                        <th>Key</th>
+                        <th>Field</th>
+                        <th>Message</th>
+                        <th>Details</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for server in servers %}
+                        {% for i in range(server.inconsistencies|length) %}
+                            {% for j in range(server.inconsistencies[i].details|length) %}
+                                
+                                    <tr>
+                                        <td>{{ server.server_id |safe }}</td>
+                                        <td>{{ server.hostname }}</td>
+                                        <td>{{ server.location }}</td>
+                                        <td>{{ server.inconsistencies[i].key }}</td>
+                                        
+                                        
+                                        <td>{{ server.inconsistencies[i].details[j].field }}</td>
+                                        <td>{{ server.inconsistencies[i].details[j].message }}</td>
+                        
+                                        {% if server.inconsistencies[i].details[j].type == "mismatch" %}
+                                            <td>
+                                                {% for val in server.inconsistencies[i].details[j]['values'] %}
+                                                    <div>{{ val.value }} (from {{ val.sources | join(', ') }})</div>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif server.inconsistencies[i].details[j].type == "missing" %}
+                                            <td>
+                                                {{ server.inconsistencies[i].details[j].missingSources | join(', ') }}
+                                            </td>
+                                        {% else %}
+                                            <td></td>
+                                        {% endif %}
+                                            
+
+                                        <td><a href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View Details</a></td>
+                                    </tr>
+                            {% endfor %}            
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            const table = $('#server-table').DataTable({
+                paging: true,
+                info: true,
+                order: [],
+                columnDefs: [
+                    { targets: [7], orderable: false } // Disable sorting on Networks and Sources columns
+                ]
+            });
+
+            // Search functionality
+            $('#search-input').on('input', function() {
+                table.search(this.value).draw();
+            });
+
+            // Column filtering functionality
+            $('#filter-column').on('change', function() {
+                const columnIndex = $(this).val();
+                const filterValue = $('#filter-value').val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+
+            $('#filter-value').on('input', function() {
+                const columnIndex = $('#filter-column').val();
+                const filterValue = $(this).val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+        });
+    </script>
+    {% endblock main %}

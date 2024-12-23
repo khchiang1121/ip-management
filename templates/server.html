@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <title>Server Data</title>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+        }
+        #server-table_filter input {
+            margin-left: 0.5rem;
+        }
+    </style>
+    {% endblock head %}
+
+    {% block title %}
+    {% endblock title %}
+    
+    {% block main %}
+    <div class="container-fluid py-5">
+        <h1 class="mb-4">Server Data</h1>
+
+        <!-- Search Input -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="search-input" class="form-control" placeholder="Search...">
+            </div>
+            <div class="col-md-4">
+                <select id="filter-column" class="form-select">
+                    <option value="">Filter by Column</option>
+                    <option value="0">Server ID</option>
+                    <option value="1">Hostname</option>
+                    <option value="2">Serial Number</option>
+                    <option value="3">Location</option>
+                    <option value="4">Datacenter</option>
+                    <option value="5">Room</option>
+                    <option value="6">Rack</option>
+                    <option value="7">Unit</option>
+                    <option value="8">OS</option>
+                    <option value="9">AS Number</option>
+                    <option value="10">Owner</option>
+                    <option value="11">Cluster</option>
+                    <option value="12">Networks</option>
+                    <option value="13">Sources</option>
+                    <option value="14">Last Updated</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="filter-value" class="form-control" placeholder="Filter value...">
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="server-table" class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Server ID</th>
+                        <th>Hostname</th>
+                        <th>Serial Number</th>
+                        <th>Location</th>
+                        <th>Datacenter</th>
+                        <th>Room</th>
+                        <th>Rack</th>
+                        <th>Unit</th>
+                        <th>OS</th>
+                        <th>AS Number</th>
+                        <th>Owner</th>
+                        <th>Cluster</th>
+                        <th>Networks</th>
+                        <th>Sources</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for server in servers %}
+                    <tr>
+                        <td>{{ server.server_id }}</td>
+                        <td>{{ server.hostname }}</td>
+                        <td>{{ server.serial_number }}</td>
+                        <td>{{ server.location }}</td>
+                        <td>{{ server.datacenter }}</td>
+                        <td>{{ server.room }}</td>
+                        <td>{{ server.rack }}</td>
+                        <td>{{ server.unit }}</td>
+                        <td>{{ server.os }}</td>
+                        <td>{{ server.as_number }}</td>
+                        <td>{{ server.owner }}</td>
+                        <td>{{ server.cluster }}</td>
+                        <td>
+                            <ul>
+                                {% for network in server.networks %}
+                                <li><strong>{{ network.name }}</strong>: {{ network.ip }} (MAC: {{ network.mac }})</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                {% for source, details in server.sources.items() %}
+                                <li>
+                                    <strong>{{ source }}</strong>:
+                                    <ul>
+                                        {% for network in details.networks %}
+                                        <li>{{ network.name }}: {{ network.ip }} (MAC: {{ network.mac }})</li>
+                                        {% endfor %}
+                                        <li>Last Updated: {{ details.last_updated }}</li>
+                                    </ul>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ server.last_updated }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            const table = $('#server-table').DataTable({
+                paging: true,
+                info: true,
+                order: [],
+                columnDefs: [
+                    { targets: [12, 13], orderable: false } // Disable sorting on Networks and Sources columns
+                ]
+            });
+
+            // Search functionality
+            $('#search-input').on('input', function() {
+                table.search(this.value).draw();
+            });
+
+            // Column filtering functionality
+            $('#filter-column').on('change', function() {
+                const columnIndex = $(this).val();
+                const filterValue = $('#filter-value').val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+
+            $('#filter-value').on('input', function() {
+                const columnIndex = $('#filter-column').val();
+                const filterValue = $(this).val();
+
+                if (columnIndex) {
+                    table.column(columnIndex).search(filterValue).draw();
+                } else {
+                    table.search(filterValue).draw();
+                }
+            });
+        });
+    </script>
+    {% endblock main %}

@@ -144,6 +144,7 @@ class Source:
 @dataclass
 class Cluster:
     cluster_id: str
+    cluster_name: Optional[str] = None
     env_config: Optional[str] = None
     owners: Optional[List[str]] = None
     cilium_cluster_id: Optional[str] = None
@@ -178,6 +179,7 @@ class Cluster:
             
         return cls(
             cluster_id=data.get("cluster_id"),
+            cluster_name=data.get("cluster_name"),
             env_config=data.get("env_config"),
             owners=data.get("owners"),
             cilium_cluster_id=data.get("cilium_cluster_id"),
@@ -190,6 +192,7 @@ class Cluster:
     def to_dict(self):
         result = {
             "cluster_id": self.cluster_id,
+            "cluster_name": self.cluster_name,
             "env_config": self.env_config,
             "owners": self.owners,
             "cilium_cluster_id": self.cilium_cluster_id,

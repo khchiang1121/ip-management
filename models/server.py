@@ -213,6 +213,31 @@ class Server:
         }
         return {key: value for key, value in result.items() if value is not None}
     
+    # not in-used
+    def sort_dict_by_order(self, input_dict, predefined_order):
+        """
+        Sort a dictionary by a predefined order of keys, appending other keys at the end.
+
+        Args:
+            input_dict (dict): The dictionary to be sorted.
+            predefined_order (list): A list specifying the order of keys.
+
+        Returns:
+            dict: A new dictionary sorted by the predefined order, with other keys appended at the end.
+        """
+        # Create a set for faster lookup of predefined keys
+        predefined_set = set(predefined_order)
+
+        # Separate keys into predefined and others
+        predefined_keys = [key for key in predefined_order if key in input_dict]
+        other_keys = [key for key in input_dict if key not in predefined_set]
+
+        # Combine sorted keys
+        sorted_keys = predefined_keys + other_keys
+
+        # Create the sorted dictionary
+        return {key: input_dict[key] for key in sorted_keys}
+    
     def refresh_last_updated(self) -> None:
         self.last_updated = datetime.now(timezone.utc)
     
