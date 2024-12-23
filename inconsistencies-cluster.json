@@ -1,0 +1,232 @@
+{
+    "_id": "676462d000b52d77ec4683e3",
+    "additional_info": {
+        "description": "So benefit commercial other."
+    },
+    "cilium_cluster_id": 6,
+    "cluster_id": "wrong-pod-cidr-in-inventory",
+    "env_config": "wrong-pod-cidr-in-inventory",
+    "inconsistencies": [
+        {
+            "details": [
+                {
+                    "field": "cidrs",
+                    "message": "CIDRS mismatch across sources",
+                    "type": "mismatch",
+                    "values": [
+                        {
+                            "sources": [
+                                "Inventory"
+                            ],
+                            "value": [
+                                "99.46.0.1/16",
+                                "99.61.0.1/16"
+                            ]
+                        },
+                        {
+                            "sources": [
+                                "MonitoringTool",
+                                "Truth"
+                            ],
+                            "value": [
+                                "172.249.0.1/16",
+                                "172.32.0.1/16"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "key": "pod_cidr-cidr",
+            "name": "pod_cidr",
+            "sources": [
+                "Inventory",
+                "MonitoringTool",
+                "Truth"
+            ],
+            "type": "cidr"
+        }
+    ],
+    "last_updated": "2024-12-19T19:30:00.660+00:00",
+    "networks": [
+        {
+            "cidrs": [
+                "172.249.0.1/16",
+                "172.32.0.1/16"
+            ],
+            "name": "pod_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "173.61.0.1/17"
+            ],
+            "name": "service_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "174.200.0.1/18",
+                "174.201.0.1/18"
+            ],
+            "name": "native_routing_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "175.31.0.1/19"
+            ],
+            "name": "non_masquerade_private_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "10.211.0.1/32",
+                "10.235.0.1/32",
+                "10.91.0.1/32"
+            ],
+            "name": "l4lb_vip",
+            "type": "cidr"
+        },
+        {
+            "egress_cidrs": [
+                "10.147.0.1/32",
+                "10.191.0.1/32"
+            ],
+            "egress_ips": [
+                "10.147.0.1/32"
+            ],
+            "hostname": "TW-DC1-R3-A02-15",
+            "name": "TW-DC1-R3-A02-15",
+            "type": "hostsubnet"
+        }
+    ],
+    "owners": [
+        "user1",
+        "user2",
+        "user3"
+    ],
+    "sources": {
+        "Inventory": {
+            "additional_info": {
+                "description": "Group series result into."
+            },
+            "cilium_cluster_id": 6,
+            "env_config": "wrong-pod-cidr-in-inventory",
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "cidrs": [
+                        "99.46.0.1/16",
+                        "99.61.0.1/16"
+                    ],
+                    "name": "pod_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "173.61.0.1/17"
+                    ],
+                    "name": "service_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "174.200.0.1/18",
+                        "174.201.0.1/18"
+                    ],
+                    "name": "native_routing_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "175.31.0.1/19"
+                    ],
+                    "name": "non_masquerade_private_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "10.211.0.1/32",
+                        "10.235.0.1/32",
+                        "10.91.0.1/32"
+                    ],
+                    "name": "l4lb_vip",
+                    "type": "cidr"
+                },
+                {
+                    "egress_cidrs": [
+                        "10.147.0.1/32",
+                        "10.191.0.1/32"
+                    ],
+                    "egress_ips": [
+                        "10.147.0.1/32"
+                    ],
+                    "hostname": "TW-DC1-R3-A02-15",
+                    "name": "TW-DC1-R3-A02-15",
+                    "type": "hostsubnet"
+                }
+            ],
+            "owners": [
+                "user1",
+                "user2",
+                "user3"
+            ]
+        },
+        "MonitoringTool": {
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "cidrs": [
+                        "172.249.0.1/16",
+                        "172.32.0.1/16"
+                    ],
+                    "name": "pod_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "173.61.0.1/17"
+                    ],
+                    "name": "service_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "174.200.0.1/18",
+                        "174.201.0.1/18"
+                    ],
+                    "name": "native_routing_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "175.31.0.1/19"
+                    ],
+                    "name": "non_masquerade_private_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "10.211.0.1/32",
+                        "10.235.0.1/32",
+                        "10.91.0.1/32"
+                    ],
+                    "name": "l4lb_vip",
+                    "type": "cidr"
+                },
+                {
+                    "egress_cidrs": [
+                        "10.147.0.1/32",
+                        "10.191.0.1/32"
+                    ],
+                    "egress_ips": [
+                        "10.147.0.1/32"
+                    ],
+                    "hostname": "TW-DC1-R3-A02-15",
+                    "name": "TW-DC1-R3-A02-15",
+                    "type": "hostsubnet"
+                }
+            ]
+        }
+    }
+}

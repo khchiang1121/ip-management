@@ -1,0 +1,150 @@
+{
+    "_id": "676462dd00b52d77ec468449",
+    "additional_info": {
+        "description": "Place accept magazine rich everything."
+    },
+    "as_number": 64671,
+    "cluster_id": "envconfig_c1",
+    "datacenter": "DC1",
+    "env_config": "envconfig_c1",
+    "hostname": "TW-DC1-R1-A01-26",
+    "inconsistencies": [
+        {
+            "name": "data",
+            "type": "ip",
+            "key": "data-ip",
+            "sources": [
+                "Inventory",
+                "MonitoringTool",
+                "Truth"
+            ],
+            "details": [
+                {
+                    "field": "ip",
+                    "message": "IP missing in some sources",
+                    "missingSources": [
+                        "Truth"
+                    ],
+                    "type": "missing"
+                },
+                {
+                    "field": "subnet_mask",
+                    "message": "SUBNET_MASK mismatch across sources",
+                    "type": "mismatch",
+                    "values": [
+                        {
+                            "sources": [
+                                "Inventory"
+                            ],
+                            "value": "255.1.2.3"
+                        },
+                        {
+                            "sources": [
+                                "MonitoringTool",
+                                "Truth"
+                            ],
+                            "value": "255.255.255.0"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "last_updated": "2024-12-19T19:30:00.660+00:00",
+    "location": "TW",
+    "networks": [
+        {
+            "mac": "DC:2C:BF:9E:F1:7D",
+            "name": "data",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        },
+        {
+            "ip": "192.64.177.208",
+            "mac": "06:EC:A3:59:7C:94",
+            "name": "maas",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        },
+        {
+            "ip": "11.19.207.224",
+            "mac": "89:25:F8:1F:2B:FD",
+            "name": "admin",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        }
+    ],
+    "os": "ubuntu 22.04",
+    "owner": "user3",
+    "rack": "A01",
+    "room": "R1",
+    "serial_number": "wrong-mask-in-Inventory",
+    "server_id": "wrong-mask-in-Inventory",
+    "sources": {
+        "Inventory": {
+            "as_number": 64671,
+            "cluster_id": "envconfig_c1",
+            "datacenter": "DC1",
+            "env_config": "envconfig_c1",
+            "hostname": "TW-DC1-R1-A01-26",
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "location": "TW",
+            "networks": [
+                {
+                    "ip": "10.236.65.157",
+                    "mac": "DC:2C:BF:9E:F1:7D",
+                    "name": "data",
+                    "subnet_mask": "255.1.2.3",
+                    "type": "ip"
+                },
+                {
+                    "ip": "192.64.177.208",
+                    "mac": "06:EC:A3:59:7C:94",
+                    "name": "maas",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "11.19.207.224",
+                    "mac": "89:25:F8:1F:2B:FD",
+                    "name": "admin",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                }
+            ],
+            "os": "ubuntu 22.04",
+            "owner": "user3",
+            "rack": "A01",
+            "room": "R1",
+            "serial_number": "wrong-mask-in-Inventory",
+            "unit": 26
+        },
+        "MonitoringTool": {
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "ip": "10.236.65.157",
+                    "mac": "DC:2C:BF:9E:F1:7D",
+                    "name": "data",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "192.64.177.208",
+                    "mac": "06:EC:A3:59:7C:94",
+                    "name": "maas",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "11.19.207.224",
+                    "mac": "89:25:F8:1F:2B:FD",
+                    "name": "admin",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                }
+            ]
+        }
+    },
+    "unit": 26
+}
