@@ -3,48 +3,8 @@ from typing import Optional, List, Dict, Any, Union
 from datetime import datetime, timezone
 from dataclasses import dataclass
 
-from models import NetworkInterface
+from models.network import NetworkInterface, create_network
 
-@dataclass
-class IPNetwork(NetworkInterface):
-    name: str
-    type: str
-    ip: Optional[str] = None
-    subnet_mask: Optional[str] = None
-    mac: Optional[str] = None
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_type(self) -> str:
-        return self.type
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "name": self.name,
-            "type": self.type,
-            "ip": self.ip,
-            "subnet_mask": self.subnet_mask,
-            "mac": self.mac,
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'IPNetwork':
-        return cls(
-            name=data.get("name"),
-            type=data.get("type"),
-            ip=data.get("ip"),
-            subnet_mask=data.get("subnet_mask"),
-            mac=data.get("mac"),
-        )
-
-    def __repr__(self) -> str:
-        # return (f"IPNetwork(name={self.name!r}, "
-        #         f"type={self.type!r}, "
-        #         f"ip={self.ip!r}, "
-        #         f"subnet_mask={self.subnet_mask!r}, "
-        #         f"mac={self.mac!r})")
-        return self.to_dict().__repr__()
 
 @dataclass
 class Source:
@@ -87,7 +47,7 @@ class Source:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Source":
-        networks = [IPNetwork.from_dict(network_data) for network_data in data["networks"]] if data.get("networks") else None
+        networks = [create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
         
         last_updated = None
         if data.get("last_updated") and isinstance(data["last_updated"], str):
@@ -163,7 +123,7 @@ class Server:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Server':
         # Create networks and sources based on data
-        networks = [IPNetwork.from_dict(network_data) for network_data in data["networks"]] if data.get("networks") else None
+        networks = [create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
         sources = {key: Source.from_dict(source_data) for key, source_data in data["sources"].items()} if data.get("sources") else None
         last_updated = None
         if data.get("last_updated") and isinstance(data["last_updated"], str):
@@ -247,12 +207,3 @@ class Server:
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
-    # def __repr__(self) -> str:
-    #     return (
-    #         f"Server(server_id={self.server_id!r}, hostname={self.hostname!r}, "
-    #         f"serial_number={self.serial_number!r}, location={self.location!r}, "
-    #         f"datacenter={self.datacenter!r}, room={self.room!r}, rack={self.rack!r}, "
-    #         f"unit={self.unit!r}, os={self.os!r}, as_number={self.as_number!r}, "
-    #         f"owner={self.owner!r}, cluster_id={self.cluster_id!r}, env_config={self.env_config!r}, additional_info={self.additional_info!r}, "
-    #         f"networks={self.networks!r}, sources={self.sources!r}, last_updated={self.last_updated!r})"
-    #     )

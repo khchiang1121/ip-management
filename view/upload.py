@@ -9,7 +9,8 @@ import xlsxwriter
 from io import BytesIO
 from utils.database import servers_collection
 from flask_session import Session
-from models.server import Server, IPNetwork, Source
+from models.server import Server, Source
+from models.network import IPNetwork
 
 upload_bp = Blueprint('upload', __name__)
 

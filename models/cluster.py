@@ -3,82 +3,8 @@ from typing import Any, List, Dict, Optional, Union
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from models import NetworkInterface
+from models.network import NetworkInterface, create_network
 
-@dataclass
-class CIDRNetwork(NetworkInterface):
-    name: str
-    type: str
-    cidrs: Optional[List[str]] = field(default_factory=list)
-
-    def get_name(self) -> str:
-        return self.name
-    
-    def get_type(self) -> str:
-        return self.type
-
-    def to_dict(self) -> Dict[str, Union[str, List[str], None]]:
-        return {
-            "name": self.name,
-            "type": self.type,
-            "cidrs": self.cidrs
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Union[str, List[str], None]]) -> 'CIDRNetwork':
-        return cls(
-            name=data.get("name"),
-            type=data.get("type"),
-            cidrs=data.get("cidrs")
-        )
-
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
-    
-    # def __repr__(self):
-    #     return f"<CIDRNetwork(name={self.name}, type={self.type}, cidrs={self.cidrs})>"
-
-@dataclass
-class HostSubnetNetwork(NetworkInterface):
-    name: str
-    type: str
-    hostname: Optional[str] = ""
-    egress_cidrs: Optional[List[str]] = field(default_factory=list)
-    egress_ips: Optional[List[str]] = field(default_factory=list)
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_type(self) -> str:
-        return self.type
-
-    def to_dict(self) -> Dict[str, Union[str, List[str], None]]:
-        return {
-            "name": self.name,
-            "type": self.type,
-            "hostname": self.hostname,
-            "egress_cidrs": self.egress_cidrs,
-            "egress_ips": self.egress_ips
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'HostSubnetNetwork':
-        return cls(
-            name=data.get("name"),
-            type=data.get("type"),
-            hostname=data.get("hostname"),
-            egress_cidrs=data.get("egress_cidrs"),
-            egress_ips=data.get("egress_ips")
-        )
-
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
-    
-    # def __repr__(self):
-    #     return (
-    #         f"<HostSubnetNetwork(name={self.name}, type={self.type}, "
-    #         f"hostname={self.hostname}, egress_cidrs={self.egress_cidrs}, egress_ips={self.egress_ips})>"
-    #     )
 
 @dataclass
 class Source:
@@ -103,7 +29,7 @@ class Source:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Source':
-        networks = [cls._create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
+        networks = [create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
         
         last_updated = None
         if data.get("last_updated") and isinstance(data["last_updated"], str):
@@ -120,15 +46,6 @@ class Source:
             networks=networks,
             last_updated=last_updated
         )
-            
-    @staticmethod
-    def _create_network(network_data: Dict[str, Union[str, int, List[str]]]) -> NetworkInterface:
-        if network_data["type"] == "cidr":
-            return CIDRNetwork(**network_data)
-        elif network_data["type"] == "hostsubnet":
-            return HostSubnetNetwork(**network_data)
-        else:
-            raise ValueError(f"Unknown network type: {network_data['type']}")
     
     def refresh_last_updated(self) -> None:
         self.last_updated = datetime.now(timezone.utc)
@@ -163,7 +80,7 @@ class Cluster:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Cluster':
-        networks = [cls._create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
+        networks = [create_network(network_data) for network_data in data["networks"]] if data.get("networks") else None
         sources = {key: Source.from_dict(source_data) for key, source_data in data["sources"].items()} if data.get("sources") else None
         if data.get("cluster_id") is None and data.get("env_config") is not None:
             data["cluster_id"] = data["env_config"]
@@ -204,17 +121,8 @@ class Cluster:
         return {key: value for key, value in result.items() if value is not None} 
 
     @staticmethod
-    def _create_network(network_data: Dict[str, Union[str, int, List[str]]]) -> NetworkInterface:
-        if network_data["type"] == "cidr":
-            return CIDRNetwork(**network_data)
-        elif network_data["type"] == "hostsubnet":
-            return HostSubnetNetwork(**network_data)
-        else:
-            raise ValueError(f"Unknown network type: {network_data['type']}")
-    
-    @staticmethod
     def _create_source(source_data: Dict[str, Any]) -> Source:
-        networks = [Cluster._create_network(network_data) for network_data in source_data["networks"]] if source_data.get("networks") else None
+        networks = [create_network(network_data) for network_data in source_data["networks"]] if source_data.get("networks") else None
         return Source(
             env_config=source_data.get("env_config", None),
             owners=source_data.get("owners", None),
