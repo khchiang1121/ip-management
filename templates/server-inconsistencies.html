@@ -91,7 +91,7 @@
                                         {% endif %}
                                             
 
-                                        <td><a href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View Details</a></td>
+                                        <td><a class="btn btn-primary btn-sm" href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View</a></td>
                                     </tr>
                             {% endfor %}            
                         {% endfor %}

@@ -75,7 +75,7 @@ class ClusterService:
             return None
         return cluster_id
 
-    def find_network_inconsistencies(self, cluster_id: str):
+    def find_network_inconsistencies(self, cluster_id: str, return_all: bool = True):
         # Define the JavaScript function to compute inconsistencies
         with open("utils/networkCheck.js") as f:
             js_function = Code(f.read())
@@ -97,13 +97,15 @@ class ClusterService:
                         }
                     }
                 }
-            },
-            {
+            }
+        ]
+        
+        if not return_all:
+            pipeline.append({
                 "$match": {
                     "inconsistencies.0": {"$exists": True}  # Only include documents with inconsistencies
                 }
-            }
-        ]
+            })
 
         # Run the aggregation pipeline and return results
         results = list(self.collection.aggregate(pipeline))

@@ -71,6 +71,7 @@
                         <th>Networks</th>
                         <th>Sources</th>
                         <th>Last Updated</th>
+                        <th>View</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,6 +112,7 @@
                             </ul>
                         </td>
                         <td>{{ server.last_updated }}</td>
+                        <td><a class="btn btn-primary btn-sm" href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

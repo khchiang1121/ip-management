@@ -89,7 +89,7 @@
                                         {% endif %}
                                             
 
-                                        <td><a href="{{ url_for('cluster_bp.cluster_details', cluster_id=cluster.cluster_id) }}">View Details</a></td>
+                                        <td><a class="btn btn-primary btn-sm" href="{{ url_for('cluster_bp.cluster_details', cluster_id=cluster.cluster_id) }}">View</a></td>
                                     </tr>
                             {% endfor %}            
                         {% endfor %}

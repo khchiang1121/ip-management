@@ -4,7 +4,9 @@ function check(
     type = ['ip', 'cidr', 'hostsubnet'],
     allowMissingFields = {},
     fieldsToCheck = {},
-    allowNullFields = {}
+    allowNullFields = {},
+    allowMissingNames = {},
+    allowNullNames = {}
 ) {
     // Helper function to check if two values are the same
     function areValuesSame(a, b) {
@@ -66,6 +68,14 @@ function check(
     // merge default allow missing fields with user provided allow missing fields
     allowMissingFields = { ...defaultAllowMissingFields, ...allowMissingFields };
 
+    const defaultAllowMissingNames = {
+        ip: ['admin'],
+        cidr: [],
+        hostsubnet: []
+    }
+    // merge default allow missing names with user provided allow missing names
+    allowMissingNames = { ...defaultAllowMissingNames, ...allowMissingNames };
+
     const defaultFieldsToCheck = {
         ip: ['ip', 'subnet_mask', 'mac'],
         cidr: ['cidrs'],
@@ -81,6 +91,14 @@ function check(
     };
     // merge default allow null fields with user provided allow null fields
     allowNullFields = { ...defaultAllowNullFields, ...allowNullFields };
+
+    const defaultAllowNullNames = {
+        ip: ['admin'],
+        cidr: [],
+        hostsubnet: []
+    }
+    // merge default allow null names with user provided allow null names
+    allowNullNames = { ...defaultAllowNullNames, ...allowNullNames };
 
     const allSources = { ...sources, Truth: { networks: networks || [] } };
     const inconsistencies = [];
@@ -138,7 +156,7 @@ function check(
 
                 if (value !== undefined) {
                     // Check null values only for fields not in allowNullFields
-                    if (value !== null || allowNullFields[record_type].includes(field)) {
+                    if (value !== null || allowNullFields[record_type].includes(field) || allowNullNames[record_type].includes(record_name)) {
                         if (value !== null) {
 
                             // Find the object with the matching IP address (value)
@@ -160,7 +178,11 @@ function check(
                     }
                 } else {
                     // Allow missing fields if specified
-                    if (!allowMissingFields[record_type].includes(field)) {
+                    // field在 name不在: nothing
+                    // field不在 name在: nothing
+                    // field不在 name不在: missingCount++
+                    // field在 name在: nothing
+                    if (!allowMissingFields[record_type].includes(field) && !allowMissingNames[record_type].includes(record_name)) {
                         missingCount++;
                     }
                 }
@@ -183,6 +205,7 @@ function check(
             }
 
             if (missingCount > 0 && !allowMissingFields[record_type].includes(field) && missingCount < totalSources) {
+                // if (missingCount > 0 && !allowMissingFields[record_type].includes(field) && !allowMissingNames[record_type].includes(record_name) && missingCount < totalSources) {
                 // Missing values detected
                 details.push({
                     field,

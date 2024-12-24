@@ -4,37 +4,37 @@
         <div class="row mb-3">
             <label class="col-sm-2 col-form-label"><strong>Network {{ loop.index }}</strong></label>
             <div class="col-sm-2">
-                <input type="text" class="form-control" value="{{ network.name }}" readonly>
+                <input class="form-control" value="{{ network.name | default() }}" readonly>
             </div>
             <div class="col-sm-2">
-                <input type="text" class="form-control" value="{{ network.type }}" readonly>
+                <input class="form-control" value="{{ network.type | default() }}" readonly>
             </div>
             <!-- if type == ip -->
             {% if network.type == 'ip' %}
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.ip }}" readonly>
+                    <input class="form-control" value="{{ network.ip | default() }}" readonly>
                 </div>
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.subnet_mask }}" readonly>
+                    <input class="form-control" value="{{ network.subnet_mask | default() }}" readonly>
                 </div>
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.mac }}" readonly>
+                    <input class="form-control" value="{{ network.mac | default() }}" readonly>
                 </div>
             <!-- if type == cidr -->
             {% elif network.type == 'cidr' %}
                 <div class="col-sm-6">
-                    <input type="text" class="form-control" value="{{ network.cidrs | join(', ') }}" readonly>
+                    <input class="form-control" value="{{ network.cidrs | join(', ')  if network.cidrs is not none else '' }}" readonly>
                 </div>
             <!-- if type == hostsubnet -->
             {% elif network.type == 'hostsubnet' %}
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.hostname }}" readonly>
+                    <input class="form-control" value="{{ network.hostname | default() }}" readonly>
                 </div>
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.egress_cidrs | join(', ') }}" readonly>
+                    <input class="form-control" value="{{ network.egress_cidrs | join(', ')  if network.egress_cidrs is not none else '' }}" readonly>
                 </div>
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" value="{{ network.egress_ips | join(', ') }}" readonly>
+                    <input class="form-control" value="{{ network.egress_ips | join(', ') if network.egress_ips is not none else '' }}" readonly>
                 </div>
             {% endif %}
         </div>

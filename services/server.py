@@ -144,7 +144,8 @@ class ServerService:
         else:
             return jsonify({"error": "Failed to add source"}), 500
 
-    def find_network_inconsistencies(self, server_id: str):
+    # add a new parameter to the function to let it return the server data even there is no inconsistency
+    def find_network_inconsistencies(self, server_id: str, return_all: bool = True):
         # Define the JavaScript function to compute inconsistencies
         with open("utils/networkCheck.js") as f:
             js_function = Code(f.read())
@@ -166,13 +167,14 @@ class ServerService:
                         }
                     }
                 }
-            },
-            {
+            }
+        ]
+        if not return_all:
+            pipeline.append({
                 "$match": {
                     "inconsistencies.0": {"$exists": True}  # Only include documents with inconsistencies
                 }
-            }
-        ]
+            })
 
         # Run the aggregation pipeline and return results
         results = list(self.collection.aggregate(pipeline))
