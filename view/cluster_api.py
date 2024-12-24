@@ -66,7 +66,7 @@ def upsert_cluster(cluster_id):
         cluster_service = ClusterService()    
         existing_cluster = cluster_service.get(cluster_id)
         create = existing_cluster is None
-        result_id = cluster_service.upsert(cluster_id, cluster)
+        result_id, _ = cluster_service.upsert(cluster_id, cluster)
     except Exception as e:
         return jsonify({"error": f"Failed to update cluster: {str(e)}"}), 500
 

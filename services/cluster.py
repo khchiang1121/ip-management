@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from bson import Code
 from pymongo.errors import PyMongoError
@@ -34,7 +34,7 @@ class ClusterService:
             return None
         return self._from_dict(data)
     
-    def get_all(self) -> Optional[Cluster]:
+    def get_all(self) -> Optional[list[Cluster]]:
         data = self.collection.find()
         if not data:
             return None
@@ -43,8 +43,31 @@ class ClusterService:
     def update(self, cluster_id: str, updated_data: Cluster):
         return self.collection.update_one({"cluster_id": cluster_id}, {"$set": updated_data.to_dict()})
 
+    # TODO: check the function of replace or create
     def upsert(self, cluster_id: str, updated_data: Cluster):
-        return self.collection.update_one({"cluster_id": cluster_id}, {"$set": updated_data.to_dict()}, upsert=True)
+        data = updated_data.to_dict()
+
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
+        
+        set_operations = [
+            {
+                "$set": { key: value for key, value in data.items() if key != "sources"}
+            }
+        ]
+        if "sources" in data.keys() and data['sources']:
+            set_operations.append({
+                '$set': {
+                    'sources': {
+                        '$mergeObjects': ['$sources', data['sources']]
+                    }
+                }
+            })
+        result = clusters_collection.update_one(
+            {"cluster_id": cluster_id},
+            set_operations,
+            upsert=True
+        )
+        return cluster_id, result
     
     def delete(self, cluster_id: str):
         result = self.collection.delete_one({"cluster_id": cluster_id})
@@ -54,190 +77,8 @@ class ClusterService:
 
     def find_network_inconsistencies(self, cluster_id: str):
         # Define the JavaScript function to compute inconsistencies
-        js_function = Code("""
-            function check(
-                networks,
-                sources,
-                type = 'cidr',
-                allowMissingFields = ['cidrs'],
-                fieldsToCheck = ['cidrs'],
-                allowNullFields = ['cidrs']
-            ) {
-                function areValuesSame(a, b) {
-                    // Check if both are strings
-                    if (typeof a === 'string' && typeof b === 'string') {
-                        return a === b;
-                    }
-
-                    // Check if both are arrays
-                    if (Array.isArray(a) && Array.isArray(b)) {
-                        // Quick length check
-                        if (a.length !== b.length) return false;
-
-                        // Count frequencies of elements in both arrays using plain object
-                        const countMap = {};
-
-                        for (const item of a) {
-                            countMap[item] = (countMap[item] || 0) + 1;
-                        }
-
-                        for (const item of b) {
-                            if (!countMap[item] || countMap[item] === 0) {
-                                return false;
-                            }
-                            countMap[item] -= 1;
-                        }
-
-                        return true;
-                    }
-
-                    // If not string or array, return false
-                    return false;
-                }
-
-                if (sources.Truth) {
-                    throw new Error("Cannot use Truth as a source name.");
-                }
-
-                const allSources = { ...sources, Truth: { networks: networks || [] } };
-                const inconsistencies = [];
-
-                // Collect all networks by `name-type` into a unified map
-                const unifiedMap = {};
-                for (const sourceName in allSources) {
-                    const source = allSources[sourceName];
-                    (source.networks || []).forEach(net => {
-                        if (net.type === type) {
-                            const key = `${net.name}-${net.type}`;
-                            if (!unifiedMap[key]) {
-                                unifiedMap[key] = [];
-                            }
-                            unifiedMap[key].push({ source: sourceName, record: net });
-                        }
-                    });
-                }
-                // Given all sources, collect all networks by `name-type` into a unified map
-                // the key is `name-type` and the value is an array of objects with source and record
-                // name and type are required, other fields are optional
-                // examples: 
-                // unifiedMap = {
-                //   'test-cidr': [
-                //     { source: 'Truth', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } },
-                //     { source: 'source1', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } }
-                //   ]
-                // }
-                //
-
-                // Check inconsistencies for each key in the unified map
-                for (const [key, entries] of Object.entries(unifiedMap)) {
-                    const name = entries[0].record.name;
-                    const type = entries[0].record.type;
-                    // example of  [key, entries]
-                    // key: 'test-cidr'
-                    // entries:
-                    // [
-                    //   { source: 'Truth', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } },
-                    //   { source: 'source1', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } }
-                    // ]
-                    const details = [];
-
-                    for (const field of fieldsToCheck) {
-                        // examples
-                        // const fieldValuesList = [
-                        //     { value: "192.168.1.1", sources: ["server1", "server2"] },
-                        //     { value: "192.168.1.2", sources: ["server3"] },
-                        // ];
-                        const fieldValuesList = [];
-                        let missingCount = 0;
-
-                        entries.forEach(({ source, record }) => {
-                            const value = record[field];
-
-                            if (value !== undefined) {
-                                // Check null values only for fields not in allowNullFields
-                                if (value !== null || allowNullFields.includes(field)) {
-                                    if (value !== null) {
-
-                                        // Find the object with the matching IP address (value)
-                                        const target = fieldValuesList.find(item => areValuesSame(item.value, value));
-                                        
-                                        // If the object is found, insert the source
-                                        if (target) {
-                                            // Check if the source is already in the sources array to avoid duplicates
-                                            if (!target.sources.includes(source)) {
-                                                target.sources.push(source);
-                                            }
-                                        } else {
-                                            fieldValuesList.push( ({value: value, sources: [source]}) )
-                                        }
-
-                                    }
-                                } else {
-                                    missingCount++;
-                                }
-                            } else {
-                                // Allow missing fields if specified
-                                if (!allowMissingFields.includes(field)) {
-                                    missingCount++;
-                                }
-                            }
-                        });
-
-                        const uniqueValuesCount = fieldValuesList.length;
-                        const totalSources = entries.length;
-
-                        // Determine if it's a mismatch, missing, or both
-                        // if (uniqueValues.length > 1) {
-                        if (uniqueValuesCount > 1) {
-                            // Mismatch detected
-                            details.push({
-                                field,
-                                type: "mismatch",
-                                values: fieldValuesList,
-                                // values: Object.entries(fieldValues).map(([value, sources]) => ({ value, sources })),
-                                message: `${field.toUpperCase()} mismatch across sources`
-                            });
-                        }
-
-                        if (missingCount > 0 && !allowMissingFields.includes(field) && missingCount < totalSources) {
-                            // Missing values detected
-                            details.push({
-                                field,
-                                type: "missing",
-                                missingSources: entries.filter(e => !e.record[field]).map(e => e.source),
-                                message: `${field.toUpperCase()} missing in some sources`
-                            });
-                        }
-
-                        // if (uniqueValuesCount > 1 && missingCount > 0) {
-                        // // if (uniqueValues.length > 1 && missingCount > 0) {
-                        //     // Both mismatch and missing detected
-                        //     details.push({
-                        //         field,
-                        //         values: fieldValuesList,
-                        //         // values: Object.entries(fieldValues).map(([value, sources]) => ({ value, sources })),
-                        //         missingSources: entries.filter(e => !e.record[field]).map(e => e.source),
-                        //         message: `${field.toUpperCase()} mismatch and missing in some sources`
-                        //     });
-                        // }
-                    }
-
-                    if (details.length > 0) {
-                        inconsistencies.push({
-                            name,
-                            type,
-                            key,
-                            sources: entries.map(e => e.source),
-                            details
-                        });
-                    }
-                }
-
-                return inconsistencies;
-            }
-
-        """)
-        
+        with open("utils/networkCheck.js") as f:
+            js_function = Code(f.read())
 
         # Define the aggregation pipeline
         pipeline = [
@@ -271,189 +112,8 @@ class ClusterService:
 
     def find_network_inconsistencies_all(self):
         # Define the JavaScript function to compute inconsistencies
-        js_function = Code("""
-            function check(
-                networks,
-                sources,
-                type = 'cidr',
-                allowMissingFields = ['cidrs'],
-                fieldsToCheck = ['cidrs'],
-                allowNullFields = ['cidrs']
-            ) {
-                function areValuesSame(a, b) {
-                    // Check if both are strings
-                    if (typeof a === 'string' && typeof b === 'string') {
-                        return a === b;
-                    }
-
-                    // Check if both are arrays
-                    if (Array.isArray(a) && Array.isArray(b)) {
-                        // Quick length check
-                        if (a.length !== b.length) return false;
-
-                        // Count frequencies of elements in both arrays using plain object
-                        const countMap = {};
-
-                        for (const item of a) {
-                            countMap[item] = (countMap[item] || 0) + 1;
-                        }
-
-                        for (const item of b) {
-                            if (!countMap[item] || countMap[item] === 0) {
-                                return false;
-                            }
-                            countMap[item] -= 1;
-                        }
-
-                        return true;
-                    }
-
-                    // If not string or array, return false
-                    return false;
-                }
-
-                if (sources.Truth) {
-                    throw new Error("Cannot use Truth as a source name.");
-                }
-
-                const allSources = { ...sources, Truth: { networks: networks || [] } };
-                const inconsistencies = [];
-
-                // Collect all networks by `name-type` into a unified map
-                const unifiedMap = {};
-                for (const sourceName in allSources) {
-                    const source = allSources[sourceName];
-                    (source.networks || []).forEach(net => {
-                        if (net.type === type) {
-                            const key = `${net.name}-${net.type}`;
-                            if (!unifiedMap[key]) {
-                                unifiedMap[key] = [];
-                            }
-                            unifiedMap[key].push({ source: sourceName, record: net });
-                        }
-                    });
-                }
-                // Given all sources, collect all networks by `name-type` into a unified map
-                // the key is `name-type` and the value is an array of objects with source and record
-                // name and type are required, other fields are optional
-                // examples: 
-                // unifiedMap = {
-                //   'test-cidr': [
-                //     { source: 'Truth', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } },
-                //     { source: 'source1', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } }
-                //   ]
-                // }
-                //
-
-                // Check inconsistencies for each key in the unified map
-                for (const [key, entries] of Object.entries(unifiedMap)) {
-                    const name = entries[0].record.name;
-                    const type = entries[0].record.type;
-                    // example of  [key, entries]
-                    // key: 'test-cidr'
-                    // entries:
-                    // [
-                    //   { source: 'Truth', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } },
-                    //   { source: 'source1', record: { name: 'test', type: 'cidr', cidrs: ['1.1.1.1/32'] } }
-                    // ]
-                    const details = [];
-
-                    for (const field of fieldsToCheck) {
-                        // examples
-                        // const fieldValuesList = [
-                        //     { value: "192.168.1.1", sources: ["server1", "server2"] },
-                        //     { value: "192.168.1.2", sources: ["server3"] },
-                        // ];
-                        const fieldValuesList = [];
-                        let missingCount = 0;
-
-                        entries.forEach(({ source, record }) => {
-                            const value = record[field];
-
-                            if (value !== undefined) {
-                                // Check null values only for fields not in allowNullFields
-                                if (value !== null || allowNullFields.includes(field)) {
-                                    if (value !== null) {
-
-                                        // Find the object with the matching IP address (value)
-                                        const target = fieldValuesList.find(item => areValuesSame(item.value, value));
-                                        
-                                        // If the object is found, insert the source
-                                        if (target) {
-                                            // Check if the source is already in the sources array to avoid duplicates
-                                            if (!target.sources.includes(source)) {
-                                                target.sources.push(source);
-                                            }
-                                        } else {
-                                            fieldValuesList.push( ({value: value, sources: [source]}) )
-                                        }
-
-                                    }
-                                } else {
-                                    missingCount++;
-                                }
-                            } else {
-                                // Allow missing fields if specified
-                                if (!allowMissingFields.includes(field)) {
-                                    missingCount++;
-                                }
-                            }
-                        });
-
-                        const uniqueValuesCount = fieldValuesList.length;
-                        const totalSources = entries.length;
-
-                        // Determine if it's a mismatch, missing, or both
-                        // if (uniqueValues.length > 1) {
-                        if (uniqueValuesCount > 1) {
-                            // Mismatch detected
-                            details.push({
-                                field,
-                                type: "mismatch",
-                                values: fieldValuesList,
-                                // values: Object.entries(fieldValues).map(([value, sources]) => ({ value, sources })),
-                                message: `${field.toUpperCase()} mismatch across sources`
-                            });
-                        }
-
-                        if (missingCount > 0 && !allowMissingFields.includes(field) && missingCount < totalSources) {
-                            // Missing values detected
-                            details.push({
-                                field,
-                                type: "missing",
-                                missingSources: entries.filter(e => !e.record[field]).map(e => e.source),
-                                message: `${field.toUpperCase()} missing in some sources`
-                            });
-                        }
-
-                        // if (uniqueValuesCount > 1 && missingCount > 0) {
-                        // // if (uniqueValues.length > 1 && missingCount > 0) {
-                        //     // Both mismatch and missing detected
-                        //     details.push({
-                        //         field,
-                        //         values: fieldValuesList,
-                        //         // values: Object.entries(fieldValues).map(([value, sources]) => ({ value, sources })),
-                        //         missingSources: entries.filter(e => !e.record[field]).map(e => e.source),
-                        //         message: `${field.toUpperCase()} mismatch and missing in some sources`
-                        //     });
-                        // }
-                    }
-
-                    if (details.length > 0) {
-                        inconsistencies.push({
-                            name,
-                            type,
-                            key,
-                            sources: entries.map(e => e.source),
-                            details
-                        });
-                    }
-                }
-
-                return inconsistencies;
-            }
-
-        """)
+        with open("utils/networkCheck.js") as f:
+            js_function = Code(f.read())
         
         # Define the aggregation pipeline
         pipeline = [

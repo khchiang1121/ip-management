@@ -94,13 +94,6 @@ def process_mapping():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# ok
-@upload_bp.route("/inconsistencies", methods = ['GET'])
-def inconsistencies():
-    inconsistencies =  find_inconsistencies()
-    return render_template('inconsistencies.html', data=inconsistencies)
-
-
 
 # Map the columns based on user input and convert to database schema format
 def process_uploaded_data_inventory_handbook(uploaded_data, column_mapping, source_name="inventory_handbook"):

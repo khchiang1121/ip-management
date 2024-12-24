@@ -69,7 +69,7 @@ def upsert_server(server_id):
         server_service = ServerService()    
         existing_server = server_service.get(server_id)
         create = existing_server is None
-        result_server_id = server_service.upsert(server_id, server)
+        result_server_id, _ = server_service.upsert(server_id, server)
     except Exception as e:
         return jsonify({"error": f"Failed to update server: {str(e)}"}), 500
 
