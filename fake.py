@@ -3,6 +3,8 @@ import random
 import shutil
 from faker import Faker
 import json
+from pathlib import Path
+
 random.seed(9001)
 Faker.seed(9001)
 # Initialize Faker instance
@@ -18,7 +20,7 @@ def delete_and_recreate_folder(folder_path):
         print(f"'{folder_path}' and its contents have been deleted.")
     
     # Recreate the folder
-    os.makedirs(folder_path)
+    Path(folder_path).mkdir(parents=True, exist_ok=True)
     print(f"'{folder_path}' has been recreated.")
     
 def generate_ip(range_type):
@@ -306,23 +308,23 @@ update_server_id(fake_data_list[idx], server_id)
 fake_data_list[idx]['networks'] = []
 
 
+delete_and_recreate_folder("./fake_data/test_server_data")
 
 idx+=1
 # Write the generated fake data to a JSON file
-output_filename = "fake_server_data.json"
+output_filename = "./fake_data/fake_server_data.json"
 with open(output_filename, "w") as json_file:
     json.dump(fake_data_list[idx], json_file, indent=4)
 
-delete_and_recreate_folder("./test_server_data")
 # Write the generated fake data to a JSON file
-output_filename = "fake_server_data_list.json"
+output_filename = "./fake_data/fake_server_data_list.json"
 with open(output_filename, "w") as json_file:
     json.dump(fake_data_list, json_file, indent=4)
     
 for id, fake_data in enumerate(fake_data_list):
     if id < idx:
         # output to a single file
-        output_filename = f"./test_server_data/{id}_{fake_data["server_id"]}.json"
+        output_filename = f"./fake_data/test_server_data/{id}_{fake_data['server_id']}.json"
         with open(output_filename, "w") as json_file:
             json.dump(fake_data, json_file, indent=4)
         # output to a list
@@ -615,24 +617,441 @@ cluster_id = "networks-is-empty-list-in-truth"
 update_cluster_id(fake_data_list[idx], cluster_id)
 fake_data_list[idx]['networks'] = []
 
+delete_and_recreate_folder("./fake_data/test_cluster_data")
+
 idx+=1
 # Write the generated fake data to a JSON file
-output_filename = "fake_cluster_data.json"
+output_filename = "./fake_data/fake_cluster_data.json"
 with open(output_filename, "w") as json_file:
     json.dump(fake_data_list[idx], json_file, indent=4)
 
-delete_and_recreate_folder("./test_cluster_data")
 # Write the generated fake data to a JSON file
-output_filename = "fake_cluster_data_list.json"
+output_filename = "./fake_data/fake_cluster_data_list.json"
 with open(output_filename, "w") as json_file:
     json.dump(fake_data_list, json_file, indent=4)
     
 for id, fake_data in enumerate(fake_data_list):
     if id < idx:
         # output to a single file
-        output_filename = f"./test_cluster_data/{id}_{fake_data["cluster_id"]}.json"
+        output_filename = f"./fake_data/test_cluster_data/{id}_{fake_data['cluster_id']}.json"
         with open(output_filename, "w") as json_file:
             json.dump(fake_data, json_file, indent=4)
         # output to a list
 
 print(f"{len(fake_data_list)} fake data entries have been written to {output_filename}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fake_inconsistencies_clutser_data = {
+    "_id": "676462d000b52d77ec4683e3",
+    "additional_info": {
+        "description": "So benefit commercial other."
+    },
+    "cilium_cluster_id": 6,
+    "cluster_id": "wrong-pod-cidr-in-inventory",
+    "env_config": "wrong-pod-cidr-in-inventory",
+    "inconsistencies": [
+        {
+            "details": [
+                {
+                    "field": "cidrs",
+                    "message": "CIDRS mismatch across sources",
+                    "type": "mismatch",
+                    "values": [
+                        {
+                            "sources": [
+                                "Inventory"
+                            ],
+                            "value": [
+                                "99.46.0.1/16",
+                                "99.61.0.1/16"
+                            ]
+                        },
+                        {
+                            "sources": [
+                                "MonitoringTool",
+                                "Truth"
+                            ],
+                            "value": [
+                                "172.249.0.1/16",
+                                "172.32.0.1/16"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "key": "pod_cidr-cidr",
+            "name": "pod_cidr",
+            "sources": [
+                "Inventory",
+                "MonitoringTool",
+                "Truth"
+            ],
+            "type": "cidr"
+        }
+    ],
+    "last_updated": "2024-12-19T19:30:00.660+00:00",
+    "networks": [
+        {
+            "cidrs": [
+                "172.249.0.1/16",
+                "172.32.0.1/16"
+            ],
+            "name": "pod_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "173.61.0.1/17"
+            ],
+            "name": "service_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "174.200.0.1/18",
+                "174.201.0.1/18"
+            ],
+            "name": "native_routing_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "175.31.0.1/19"
+            ],
+            "name": "non_masquerade_private_cidr",
+            "type": "cidr"
+        },
+        {
+            "cidrs": [
+                "10.211.0.1/32",
+                "10.235.0.1/32",
+                "10.91.0.1/32"
+            ],
+            "name": "l4lb_vip",
+            "type": "cidr"
+        },
+        {
+            "egress_cidrs": [
+                "10.147.0.1/32",
+                "10.191.0.1/32"
+            ],
+            "egress_ips": [
+                "10.147.0.1/32"
+            ],
+            "hostname": "TW-DC1-R3-A02-15",
+            "name": "TW-DC1-R3-A02-15",
+            "type": "hostsubnet"
+        }
+    ],
+    "owners": [
+        "user1",
+        "user2",
+        "user3"
+    ],
+    "sources": {
+        "Inventory": {
+            "additional_info": {
+                "description": "Group series result into."
+            },
+            "cilium_cluster_id": 6,
+            "env_config": "wrong-pod-cidr-in-inventory",
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "cidrs": [
+                        "99.46.0.1/16",
+                        "99.61.0.1/16"
+                    ],
+                    "name": "pod_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "173.61.0.1/17"
+                    ],
+                    "name": "service_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "174.200.0.1/18",
+                        "174.201.0.1/18"
+                    ],
+                    "name": "native_routing_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "175.31.0.1/19"
+                    ],
+                    "name": "non_masquerade_private_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "10.211.0.1/32",
+                        "10.235.0.1/32",
+                        "10.91.0.1/32"
+                    ],
+                    "name": "l4lb_vip",
+                    "type": "cidr"
+                },
+                {
+                    "egress_cidrs": [
+                        "10.147.0.1/32",
+                        "10.191.0.1/32"
+                    ],
+                    "egress_ips": [
+                        "10.147.0.1/32"
+                    ],
+                    "hostname": "TW-DC1-R3-A02-15",
+                    "name": "TW-DC1-R3-A02-15",
+                    "type": "hostsubnet"
+                }
+            ],
+            "owners": [
+                "user1",
+                "user2",
+                "user3"
+            ]
+        },
+        "MonitoringTool": {
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "cidrs": [
+                        "172.249.0.1/16",
+                        "172.32.0.1/16"
+                    ],
+                    "name": "pod_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "173.61.0.1/17"
+                    ],
+                    "name": "service_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "174.200.0.1/18",
+                        "174.201.0.1/18"
+                    ],
+                    "name": "native_routing_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "175.31.0.1/19"
+                    ],
+                    "name": "non_masquerade_private_cidr",
+                    "type": "cidr"
+                },
+                {
+                    "cidrs": [
+                        "10.211.0.1/32",
+                        "10.235.0.1/32",
+                        "10.91.0.1/32"
+                    ],
+                    "name": "l4lb_vip",
+                    "type": "cidr"
+                },
+                {
+                    "egress_cidrs": [
+                        "10.147.0.1/32",
+                        "10.191.0.1/32"
+                    ],
+                    "egress_ips": [
+                        "10.147.0.1/32"
+                    ],
+                    "hostname": "TW-DC1-R3-A02-15",
+                    "name": "TW-DC1-R3-A02-15",
+                    "type": "hostsubnet"
+                }
+            ]
+        }
+    }
+}
+
+
+# Write the generated fake data to a JSON file
+output_filename = "./fake_data/fake_inconsistencies_clutser_data.json"
+with open(output_filename, "w") as json_file:
+    json.dump(fake_inconsistencies_clutser_data, json_file, indent=4)
+    
+fake_inconsistencies_server_data = {
+    "_id": "676462dd00b52d77ec468449",
+    "additional_info": {
+        "description": "Place accept magazine rich everything."
+    },
+    "as_number": 64671,
+    "cluster_id": "envconfig_c1",
+    "datacenter": "DC1",
+    "env_config": "envconfig_c1",
+    "hostname": "TW-DC1-R1-A01-26",
+    "inconsistencies": [
+        {
+            "name": "data",
+            "type": "ip",
+            "key": "data-ip",
+            "sources": [
+                "Inventory",
+                "MonitoringTool",
+                "Truth"
+            ],
+            "details": [
+                {
+                    "field": "ip",
+                    "message": "IP missing in some sources",
+                    "missingSources": [
+                        "Truth"
+                    ],
+                    "type": "missing"
+                },
+                {
+                    "field": "subnet_mask",
+                    "message": "SUBNET_MASK mismatch across sources",
+                    "type": "mismatch",
+                    "values": [
+                        {
+                            "sources": [
+                                "Inventory"
+                            ],
+                            "value": "255.1.2.3"
+                        },
+                        {
+                            "sources": [
+                                "MonitoringTool",
+                                "Truth"
+                            ],
+                            "value": "255.255.255.0"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "last_updated": "2024-12-19T19:30:00.660+00:00",
+    "location": "TW",
+    "networks": [
+        {
+            "mac": "DC:2C:BF:9E:F1:7D",
+            "name": "data",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        },
+        {
+            "ip": "192.64.177.208",
+            "mac": "06:EC:A3:59:7C:94",
+            "name": "maas",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        },
+        {
+            "ip": "11.19.207.224",
+            "mac": "89:25:F8:1F:2B:FD",
+            "name": "admin",
+            "subnet_mask": "255.255.255.0",
+            "type": "ip"
+        }
+    ],
+    "os": "ubuntu 22.04",
+    "owner": "user3",
+    "rack": "A01",
+    "room": "R1",
+    "serial_number": "wrong-mask-in-Inventory",
+    "server_id": "wrong-mask-in-Inventory",
+    "sources": {
+        "Inventory": {
+            "as_number": 64671,
+            "cluster_id": "envconfig_c1",
+            "datacenter": "DC1",
+            "env_config": "envconfig_c1",
+            "hostname": "TW-DC1-R1-A01-26",
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "location": "TW",
+            "networks": [
+                {
+                    "ip": "10.236.65.157",
+                    "mac": "DC:2C:BF:9E:F1:7D",
+                    "name": "data",
+                    "subnet_mask": "255.1.2.3",
+                    "type": "ip"
+                },
+                {
+                    "ip": "192.64.177.208",
+                    "mac": "06:EC:A3:59:7C:94",
+                    "name": "maas",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "11.19.207.224",
+                    "mac": "89:25:F8:1F:2B:FD",
+                    "name": "admin",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                }
+            ],
+            "os": "ubuntu 22.04",
+            "owner": "user3",
+            "rack": "A01",
+            "room": "R1",
+            "serial_number": "wrong-mask-in-Inventory",
+            "unit": 26
+        },
+        "MonitoringTool": {
+            "last_updated": "2024-12-19T19:30:00.660+00:00",
+            "networks": [
+                {
+                    "ip": "10.236.65.157",
+                    "mac": "DC:2C:BF:9E:F1:7D",
+                    "name": "data",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "192.64.177.208",
+                    "mac": "06:EC:A3:59:7C:94",
+                    "name": "maas",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                },
+                {
+                    "ip": "11.19.207.224",
+                    "mac": "89:25:F8:1F:2B:FD",
+                    "name": "admin",
+                    "subnet_mask": "255.255.255.0",
+                    "type": "ip"
+                }
+            ]
+        }
+    },
+    "unit": 26
+}
+
+# write to a file
+output_filename = "./fake_data/fake_inconsistencies_server_data.json"
+with open(output_filename, "w") as json_file:
+    json.dump(fake_inconsistencies_server_data, json_file, indent=4)

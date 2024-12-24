@@ -14,7 +14,7 @@ servers_networks.xlsx
 materials/
 .mypy_cache/
 .pytest_cache/
-
+fake_data/
 
 
 .DS_Store

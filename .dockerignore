@@ -7,3 +7,4 @@ test_cluster_data/
 test_server_data/
 test_cluster_response_data/
 test_server_response_data/
+fake_data/
