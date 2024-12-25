@@ -8,7 +8,7 @@ config = ConfigParser()
 config.read('config.ini', encoding='utf-8')
 
 # Database connection details
-mongo_uri = os.environ.get("MONGO_URI", config.get('database', 'mongo_url', fallback = None))
+mongo_uri = os.environ.get("MONGO_URI", config.get('database', 'mongo_uri', fallback = None))
 mongo_database = os.environ.get("MONGO_DATABASE", config.get('database', 'mongo_database', fallback = None))
 mongo_userame = os.environ.get("MONGO_USERNAME", config.get('database', 'mongo_username', fallback = None))
 mongo_password = os.environ.get("MONGO_PASSWORD", config.get('database', 'mongo_password', fallback = None))
