@@ -31,12 +31,13 @@
                     <option value="">Filter by Column</option>
                     <option value="0">Server ID</option>
                     <option value="1">Hostname</option>
-                    <option value="2">Location</option>
-                    <option value="3">Key</option>
-                    <option value="4">Field</option>
-                    <option value="5">Message</option>
-                    <option value="6">Details</option>
-                    <option value="7">View</option>
+                    <option value="2">Cluster ID</option>
+                    <option value="3">Location</option>
+                    <option value="4">Key</option>
+                    <option value="5">Field</option>
+                    <option value="6">Message</option>
+                    <option value="7">Details</option>
+                    <option value="8">View</option>
 
 
                 </select>
@@ -53,6 +54,7 @@
                     <tr>
                         <th>Server ID</th>
                         <th>Hostname</th>
+                        <th>Cluster ID</th>
                         <th>Location</th>
                         <th>Key</th>
                         <th>Field</th>
@@ -69,6 +71,7 @@
                                     <tr>
                                         <td>{{ server.server_id |safe }}</td>
                                         <td>{{ server.hostname }}</td>
+                                        <td>{{ server.cluster_id }}</td>
                                         <td>{{ server.location }}</td>
                                         <td>{{ server.inconsistencies[i].key }}</td>
                                         
@@ -109,7 +112,7 @@
                 info: true,
                 order: [],
                 columnDefs: [
-                    { targets: [7], orderable: false } // Disable sorting on Networks and Sources columns
+                    { targets: [8], orderable: false } // Disable sorting on Networks and Sources columns
                 ]
             });
 

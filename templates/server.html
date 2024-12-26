@@ -97,7 +97,7 @@
                             </ul>
                         </td>
                         <td>
-                            <ul>
+                            {% comment %} <ul>
                                 {% for source, details in server.sources.items() %}
                                 <li>
                                     <strong>{{ source }}</strong>:
@@ -109,7 +109,7 @@
                                     </ul>
                                 </li>
                                 {% endfor %}
-                            </ul>
+                            </ul> {% endcomment %}
                         </td>
                         <td>{{ server.last_updated }}</td>
                         <td><a class="btn btn-primary btn-sm" href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View</a></td>
