@@ -55,6 +55,14 @@ class ServerService:
         servers = [self._from_dict(server) for server in servers]
         return servers
 
+    def get_paginated(self, page, limit):
+        """Fetch paginated server data."""
+        skip = (page - 1) * limit
+        cursor = servers_collection.find().skip(skip).limit(limit)
+        total_count = servers_collection.count_documents({})
+        servers = [self._from_dict(doc) for doc in cursor]
+        return servers, total_count
+    
     def update(self, server_id: str, server_data: Server):
         """Update a server by ID."""
         server = find_server_by_id(server_id)

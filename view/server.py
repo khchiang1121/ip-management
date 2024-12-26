@@ -23,6 +23,33 @@ def show_servers():
 
     return render_template('server.html', servers=servers)
 
+@server_bp.route("/ajax", methods=["GET"])
+def show_servers_ajax():
+    """Get all servers."""
+
+    server_service = ServerService()
+    # servers = server_service.get_all()
+    
+    # Get pagination parameters from the request
+    page = int(request.args.get('page', 1))  # Default to page 1
+    limit = int(request.args.get('limit', 10))  # Default to 10 items per page
+    # Fetch the data with pagination
+    servers, total_count = server_service.get_paginated(page, limit)
+    if request.args.get('ajax'):  # Check if it's an AJAX request
+        server_dicts = [server.to_dict() for server in servers] if servers else []
+        return jsonify({
+            "data": server_dicts,
+            "recordsTotal": total_count,
+            "recordsFiltered": total_count,
+        })
+        
+    if not servers:
+        servers = []
+    else:
+        servers = [server.to_dict() for server in servers]
+
+    return render_template('server-ajax.html', servers=servers, total_count=total_count)
+
 # ok
 @server_bp.route("/<string:server_id>", methods=["GET"])
 def server_details(server_id):
