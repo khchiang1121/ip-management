@@ -9,10 +9,13 @@ function check(
     allowNullNames = {}
 ) {
     // Helper function to check if two values are the same
-    function areValuesSame(a, b) {
+    function areValuesSame(a, b, case_sensitive = false) {
         // Check if both are strings
         if (typeof a === 'string' && typeof b === 'string') {
-            return a === b;
+            if (case_sensitive) {
+                return a === b;
+            }
+            return a.toUpperCase() === b.toUpperCase();
         }
 
         // Check if both are arrays
