@@ -24,7 +24,6 @@
     "env_config": "Env Config",
 } %}
 
-<!-- <body class="bg-light"> -->
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col">
@@ -59,9 +58,9 @@
 
         <!-- Source Data -->
         {% if server.sources %}
-            {% for souece_name, source in server.sources.items() %}
+            {% for source_name, source in server.sources.items() %}
                 <fieldset class="border rounded p-3 mb-4">
-                    <legend class="float-none w-auto px-3 bg-info text-white rounded">Source Data - {{ souece_name }}</legend>
+                    <legend class="float-none w-auto px-3 bg-info text-white rounded">Source Data - {{ source_name }}</legend>
                     {% with data=source,general_info_mapping=general_info_mapping %}
                     {% include "components/general-details.html" %}
                     {% endwith %}
@@ -82,10 +81,15 @@
             {% endfor %}
         {% endif %}
 
-        <!-- Modify Button -->
+        {% if edit_mode %}
+        <!-- Save Button -->
         <!-- <div class="text-center">
             <button type="button" class="btn btn-warning">Modify</button>
         </div> -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-warning">Save</button>
+        </div>
+        {% endif %}
     </form>
 </div>
 

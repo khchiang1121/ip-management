@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, flash, redirect, render_template, request, jsonify, url_for
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
 from flask_deprecate import deprecate_route
@@ -37,18 +37,25 @@ def server_details(server_id):
 
     return render_template('server-details.html', server=server)
 
-@server_bp.route("/network-inconsistencies", methods=["GET"])
-def show_network_inconsistencies_servers():
+@server_bp.route("/<string:server_id>/edit", methods=["GET"])
+def edit_server(server_id):
     """Get all servers."""
 
     server_service = ServerService()
-    servers =  server_service.find_network_inconsistencies_all()
     
-    if servers is None:
-        servers = []
+    if request.method == "POST":
+        # Process form submission
+        data = request.form.to_dict()
+        server_service.update(server_id, data)
+        flash("Server updated successfully")
+        return redirect(url_for('server_bp.server_details', server_id=server_id))
     
-    for server in servers:
-        if "_id" in server:
-            server["_id"] = str(server["_id"])
+    server = server_service.find_network_inconsistencies(server_id)
+    if not server:
+        server = {}
+    # else:
+    #     server = server.to_dict()
 
-    return render_template('server-inconsistencies.html', servers=servers)
+    return render_template('server-details.html', server=server, edit_mode=True)
+
+

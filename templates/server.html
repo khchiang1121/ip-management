@@ -91,13 +91,16 @@
                         <td>{{ server.cluster }}</td>
                         <td>
                             <ul>
+                                {#
                                 {% for network in server.networks %}
                                 <li><strong>{{ network.name }}</strong>: {{ network.ip }} (MAC: {{ network.mac }})</li>
                                 {% endfor %}
+                                #}
                             </ul>
                         </td>
                         <td>
-                            {% comment %} <ul>
+                            <ul>
+                                {# 
                                 {% for source, details in server.sources.items() %}
                                 <li>
                                     <strong>{{ source }}</strong>:
@@ -109,7 +112,8 @@
                                     </ul>
                                 </li>
                                 {% endfor %}
-                            </ul> {% endcomment %}
+                                #}
+                            </ul>
                         </td>
                         <td>{{ server.last_updated }}</td>
                         <td><a class="btn btn-primary btn-sm" href="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">View</a></td>

@@ -79,13 +79,16 @@
                         <td>{{ cluster.additional_info }}</td>
                         <td>
                             <ul>
+                                {#
                                 {% for network in cluster.networks %}
                                 <li><strong>{{ network.name }}</strong>: {{ network.ip }} (MAC: {{ network.mac }})</li>
                                 {% endfor %}
+                                #}
                             </ul>
                         </td>
                         <td>
                             <ul>
+                                {#
                                 {% for source, details in cluster.sources.items() %}
                                 <li>
                                     <strong>{{ source }}</strong>:
@@ -97,6 +100,7 @@
                                     </ul>
                                 </li>
                                 {% endfor %}
+                                #}
                             </ul>
                         </td>
                         <td>{{ cluster.last_updated }}</td>
