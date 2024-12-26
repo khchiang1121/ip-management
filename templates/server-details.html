@@ -31,11 +31,11 @@
         </div>
     </div>
 
-    <form>
+    <form method="post" action="{{ url_for('server_bp.server_details', server_id=server.server_id) }}">
         <!-- General Information -->
         <fieldset class="border rounded p-3 mb-4">
             <legend class="float-none w-auto px-3 bg-primary text-white rounded">General Information</legend>
-            {% with data=server,general_info_mapping=general_info_mapping %}
+            {% with data = server, general_info_mapping = general_info_mapping, edit_mode = edit_mode %}
             {% include "components/general-details.html" %}
             {% endwith %}
         </fieldset>
@@ -43,7 +43,7 @@
         <!-- Network Details -->
         <fieldset class="border rounded p-3 mb-4">
             <legend class="float-none w-auto px-3 bg-secondary text-white rounded">Network Details</legend>
-            {% with networks=server.networks %}
+            {% with networks = server.networks, edit_mode = edit_mode %}
             {% include "components/network-details.html" %}
             {% endwith %}
         </fieldset>
@@ -51,7 +51,7 @@
         <!-- Inconsistencies -->
         <fieldset class="border rounded p-3 mb-4">
             <legend class="float-none w-auto px-3 bg-danger text-white rounded">Inconsistencies</legend>
-            {% with inconsistencies=server.inconsistencies %}
+            {% with inconsistencies = server.inconsistencies, edit_mode = edit_mode %}
             {% include "components/inconsistencies-details.html" %}
             {% endwith %}
         </fieldset>
@@ -61,11 +61,11 @@
             {% for source_name, source in server.sources.items() %}
                 <fieldset class="border rounded p-3 mb-4">
                     <legend class="float-none w-auto px-3 bg-info text-white rounded">Source Data - {{ source_name }}</legend>
-                    {% with data=source,general_info_mapping=general_info_mapping %}
+                    {% with data = source, general_info_mapping = general_info_mapping, edit_mode = edit_mode %}
                     {% include "components/general-details.html" %}
                     {% endwith %}
 
-                    {% with networks=source.networks | default([]) %}
+                    {% with networks = source.networks | default([]), edit_mode = edit_mode %}
                     {% include "components/network-details.html" %}
                     {% endwith %}
 

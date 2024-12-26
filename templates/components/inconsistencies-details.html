@@ -1,15 +1,21 @@
+{% macro set_readonly() -%}
+  {% if edit_mode %}
+    readonly
+  {% endif %}
+{%- endmacro %}
+
 {% for inconsistency in inconsistencies %}
 <fieldset class="border rounded p-3 mb-4">
     <div class="row mb-3">
         <label class="col-sm-2 col-form-label"><strong>Name</strong></label>
         <div class="col-sm-10">
-            <input class="form-control" value="{{ inconsistency.name }}" readonly>
+            <input class="form-control" value="{{ inconsistency.name }}" set_readonly()>
         </div>
     </div>
     <div class="row mb-3">
         <label class="col-sm-2 col-form-label"><strong>Type</strong></label>
         <div class="col-sm-10">
-            <input class="form-control" value="{{ inconsistency.type }}" readonly>
+            <input class="form-control" value="{{ inconsistency.type }}" set_readonly()>
         </div>
     </div>
 
@@ -19,17 +25,17 @@
         <div class="row mb-3">
             <label class="col-sm-2 col-form-label"><strong>Field</strong></label>
             <div class="col-sm-4">
-                <input class="form-control" value="{{ detail.field }}" readonly>
+                <input class="form-control" value="{{ detail.field }}" set_readonly()>
             </div>
             <label class="col-sm-2 col-form-label"><strong>Type</strong></label>
             <div class="col-sm-4">
-                <input class="form-control" value="{{ detail.type }}" readonly>
+                <input class="form-control" value="{{ detail.type }}" set_readonly()>
             </div>
         </div>
         <div class="row mb-3">
             <label class="col-sm-2 col-form-label"><strong>Message</strong></label>
             <div class="col-sm-10">
-                <input class="form-control" value="{{ detail.message }}" readonly>
+                <input class="form-control" value="{{ detail.message }}" set_readonly()>
             </div>
         </div>
 
@@ -44,11 +50,11 @@
                     {% endif %}
                     <label class="col-sm-1 col-form-label"><strong>Sources</strong></label>
                     <div class="col-sm-4">
-                        <input class="form-control" value="{{ val.sources | join(', ') }}" readonly>
+                        <input class="form-control" value="{{ val.sources | join(', ') }}" set_readonly()>
                     </div>
                     <label class="col-sm-1 col-form-label"><strong>Values</strong></label>
                     <div class="col-sm-4">
-                        <input class="form-control" value="{{ val.value }}" readonly>
+                        <input class="form-control" value="{{ val.value }}" set_readonly()>
                     </div>
                 </div>
             {% endfor %}
@@ -58,7 +64,7 @@
             <div class="row mb-3">
                 <label class="col-sm-2 col-form-label"><strong>missingSources</strong></label>
                 <div class="col-sm-10">
-                    <input class="form-control" value="{{ detail.missingSources | join(', ') }}" readonly>
+                    <input class="form-control" value="{{ detail.missingSources | join(', ') }}" set_readonly()>
                 </div>
             </div>
         {% endif %}

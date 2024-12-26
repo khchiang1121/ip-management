@@ -51,11 +51,22 @@ def show_servers_ajax():
     return render_template('server-ajax.html', servers=servers, total_count=total_count)
 
 # ok
-@server_bp.route("/<string:server_id>", methods=["GET"])
+@server_bp.route("/<string:server_id>", methods=["GET", "POST"])
 def server_details(server_id):
     """Get all servers."""
 
     server_service = ServerService()
+    if request.method == "POST":
+        # Process form submission
+        data = request.form.to_dict()
+        try:
+            server_service.update(server_id, Server.from_dict(data))
+            flash("Server update successfully")
+            return redirect(url_for('server_bp.server_details', server_id=server_id))
+        except Exception as e:
+            flash("error: " + str(e))
+            return redirect(url_for('server_bp.server_details', server_id=server_id))
+        
     server = server_service.find_network_inconsistencies(server_id)
     if not server:
         server = {}
