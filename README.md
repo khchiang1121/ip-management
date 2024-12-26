@@ -50,3 +50,23 @@ python get_response.py
 
 flask --debug run --host=0.0.0.0 --port=8100
 flask --debug run --host=0.0.0.0 --port=8100
+
+
+# TODO
+allow ignore admin ip missing check =>make it configable
+ip conflict check
+Edit inventor
+export data
+update server is not complete!!!
+
+
+- support compare all type in a same time
+- support ignore by name when comparing
+- remove non-exist key's data from server and cluster details
+- show inconsistencies data even if there is no inconsistencies
+- add base template to details page
+- add view button to the server table and cluser table
+- fix network details template when ket does not exist
+- [refactor] reorganize network-related classes; move IPNetwork to new module and update references: factory mode!
+- server and cluster support all type of network
+
