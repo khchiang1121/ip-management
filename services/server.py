@@ -115,7 +115,7 @@ class ServerService:
                         {"$eq": ["$server_id", ""]},
                         {"$not": {"$ifNull": ["$server_id", False]}},
                         {"$regexMatch": {"input": "$server_id", "regex": "^missing"}},
-                        {"$eq": [{"$size": {"$objectToArray": "$server_id"}}, 1]}
+                        {"$eq": [{"$size": {"$objectToArray": "$$ROOT"}}, 1]}
                     ]
                 },
                 "then": server_id,
