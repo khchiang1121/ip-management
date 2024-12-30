@@ -24,5 +24,4 @@ bcrypt
 pytest
 pytest-html
 pytest-csv
-git+https://github.com/jcrist/msgspec.git
 

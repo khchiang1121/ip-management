@@ -33,8 +33,10 @@ def show_servers_ajax():
     # Get pagination parameters from the request
     page = int(request.args.get('page', 1))  # Default to page 1
     limit = int(request.args.get('limit', 10))  # Default to 10 items per page
+    search = str(request.args.get('search', None))  # Default to 10 items per page
+    
     # Fetch the data with pagination
-    servers, total_count = server_service.get_paginated(page, limit)
+    servers, total_count = server_service.get_paginated(page, limit, search)
     if request.args.get('ajax'):  # Check if it's an AJAX request
         server_dicts = [server.to_dict() for server in servers] if servers else []
         return jsonify({

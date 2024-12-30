@@ -144,6 +144,7 @@
                             page: Math.floor(d.start / d.length) + 1,
                             limit: d.length,
                             ajax: 1, // Flag to indicate an AJAX request
+                            search: d.search.value
                         };
                     },
                     dataSrc: 'data', // Map the "servers" key from the response to DataTables
