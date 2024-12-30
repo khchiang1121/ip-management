@@ -33,10 +33,16 @@ def show_servers_ajax():
     # Get pagination parameters from the request
     page = int(request.args.get('page', 1))  # Default to page 1
     limit = int(request.args.get('limit', 10))  # Default to 10 items per page
-    search = str(request.args.get('search', None))  # Default to 10 items per page
+    search = str(request.args.get('search[value]', None))  # Default to 10 items per page
     
+    # Dynamically get the columns from the request
+    columns = [request.args.get(f'columns[{i}][data]') for i in range(len(request.args)) if request.args.get(f'columns[{i}][data]')]
+
+    # Convert the search parameters to a dictionary
+    search_columns = {col: str(request.args.get(f'columns[{i}][search][value]', None)) for i, col in enumerate(columns)}
+
     # Fetch the data with pagination
-    servers, total_count = server_service.get_paginated(page, limit, search)
+    servers, total_count = server_service.get_paginated(page, limit, search, search_columns)
     if request.args.get('ajax'):  # Check if it's an AJAX request
         server_dicts = [server.to_dict() for server in servers] if servers else []
         return jsonify({

@@ -139,13 +139,12 @@
                 ajax: {
                     url: '/servers/ajax',
                     method: 'GET',
+                    // merge the original query parameters with the DataTables parameters
+
                     data: function (d) {
-                        return {
-                            page: Math.floor(d.start / d.length) + 1,
-                            limit: d.length,
-                            ajax: 1, // Flag to indicate an AJAX request
-                            search: d.search.value
-                        };
+                        d.page = Math.floor(d.start / d.length) + 1,
+                        d.limit = d.length,
+                        d.ajax = 1
                     },
                     dataSrc: 'data', // Map the "servers" key from the response to DataTables
                 },
@@ -172,6 +171,27 @@
                         },
                     },
                 ],
+                initComplete: function () {
+                    this.api()
+                        .columns()
+                        .every(function () {
+                            let column = this;
+                            let title = column.header().textContent;
+            
+                            // Create input element
+                            let input = document.createElement('input');
+                            input.placeholder = title;
+                            column.header().replaceChildren(input);
+            
+                            // Event listener for user input
+                            input.addEventListener('input', () => {
+                                if (column.search() !== input.value) {
+                                    column.search(input.value).draw();
+                                }
+                            });
+                        });
+                },
+
             });
 
             // Search functionality
@@ -183,7 +203,7 @@
             $('#filter-column').on('change', function() {
                 const columnIndex = $(this).val();
                 const filterValue = $('#filter-value').val();
-
+                console.log(columnIndex, filterValue);
                 if (columnIndex) {
                     table.column(columnIndex).search(filterValue).draw();
                 } else {
@@ -194,6 +214,7 @@
             $('#filter-value').on('input', function() {
                 const columnIndex = $('#filter-column').val();
                 const filterValue = $(this).val();
+                console.log(columnIndex, filterValue);
 
                 if (columnIndex) {
                     table.column(columnIndex).search(filterValue).draw();

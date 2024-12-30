@@ -55,13 +55,15 @@ class ServerService:
         servers = [self._from_dict(server) for server in servers]
         return servers
 
-    def get_paginated(self, page, limit, search = None):
+    def get_paginated(self, page, limit, search = None, search_columns = None):
         """Fetch paginated server data."""
         skip = (page - 1) * limit
-        
         query = {}
-        if search:
+        if search.strip():
             query['hostname'] = {'$regex': f'.*{search}.*', '$options': 'i'}
+        for column, value in search_columns.items():
+            if value.strip():
+                query[column] = {'$regex': f'.*{value}.*', '$options': 'i'}
             
         cursor = servers_collection.find(query).skip(skip).limit(limit)
         total_count = servers_collection.count_documents({})
