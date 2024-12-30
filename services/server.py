@@ -80,7 +80,7 @@ class ServerService:
         return server_id
     
     # TODO: check the function of replace or create
-    def upsert(self, server_id: Optional[str] = None, server: Optional[Server] = None, filter: Optional[Dict] = None):
+    def upsert(self, server_id: Optional[str] = None, hostname: Optional[str] = None, server: Optional[Server] = None, filter: Optional[Dict] = None):
         """Create or update a server."""
         if not server:
             raise ValueError("Server data is required")
@@ -90,7 +90,14 @@ class ServerService:
         data["last_updated"] = datetime.now(timezone.utc).isoformat()
         
         if not filter:
-            filter = {"server_id": server_id}
+            if server_id and not hostname and not server_id.startswith("missing"):
+                filter = {"server_id": server_id}
+            elif hostname and not server_id:
+                filter = {"hostname": hostname}
+            elif server_id and hostname:
+                filter = {"$or": [{"server_id": server_id}, {"hostname": hostname}]}
+            else:
+                raise ValueError("Server ID or hostname is required")
             
         set_operations = [
             {
@@ -98,7 +105,29 @@ class ServerService:
             }
         ]
         
+        set_operations[0]['$set']['server_id'] = {
+            "$cond": {
+                "if": {
+                    "$or": [
+                        {"$eq": ["$server_id", None]},
+                        {"$eq": ["$server_id", ""]},
+                        {"$not": {"$ifNull": ["$server_id", False]}},
+                        {"$regexMatch": {"input": "$server_id", "regex": "^missing"}},
+                        {"$eq": [{"$size": {"$objectToArray": "$server_id"}}, 1]}
+                    ]
+                },
+                "then": server_id,
+                "else": "$server_id"
+            }
+        }
+        
         if "sources" in data.keys() and data['sources']:
+            # unset the sources field before updating
+            if data['sources'].keys():
+                unset_sources = [ "sources." + key for key in data['sources'].keys()]
+                set_operations.append({
+                    '$unset': unset_sources
+                })
             set_operations.append({
                 '$set': {
                     'sources': {
